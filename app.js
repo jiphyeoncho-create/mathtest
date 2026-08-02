@@ -1072,6 +1072,11 @@ function initApp() {
   setupAuthListeners();
 }
 
+// 글로벌 window 객체 바인딩 (HTML direct onclick 100% 지원)
+window.startMiniGame = startMiniGame;
+window.startBossRaid = startBossRaid;
+window.showScreen = showScreen;
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {

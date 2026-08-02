@@ -53,7 +53,7 @@
       <!-- 상단 3가지 미니게임 카드 그리드 -->
       <div class="dashboard-grid minigames-grid">
         <!-- 미니게임 1 카드 -->
-        <div class="game-card minigame-card" data-game="1">
+        <div class="game-card minigame-card" data-game="1" onclick="window.startMiniGame(1)">
           <div class="card-tag">미니게임 1 (40초)</div>
           <div class="card-icon"><i class="fa-solid fa-pen-ruler"></i></div>
           <h3>위/앞/옆 모눈종이에 그리기</h3>
@@ -61,21 +61,21 @@
           <div class="card-reward-tier">
             <span>⚡ 10초내: 10G</span> | <span>🏃 20초내: 5G</span> | <span>2G / 1G</span>
           </div>
-          <button class="btn btn-primary btn-play">도전하기 (40초)</button>
+          <button class="btn btn-primary btn-play" onclick="window.startMiniGame(1); event.stopPropagation();">도전하기 (40초)</button>
         </div>
 
         <!-- 미니게임 2 카드 -->
-        <div class="game-card minigame-card" data-game="2">
+        <div class="game-card minigame-card" data-game="2" onclick="window.startMiniGame(2)">
           <div class="card-tag">미니게임 2 (30초 연속)</div>
           <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
           <h3>1층/2층 & 최소개수 스피드 퀴즈</h3>
           <p>30초 동안 3D 모형의 1층/2층 높이 개수 및 개수 퀴즈를 연속해서 맞추세요!</p>
           <div class="card-reward"><i class="fa-solid fa-coins"></i> 보상: <strong>한 문제당 +5 Gold</strong></div>
-          <button class="btn btn-primary btn-play">도전하기 (30초)</button>
+          <button class="btn btn-primary btn-play" onclick="window.startMiniGame(2); event.stopPropagation();">도전하기 (30초)</button>
         </div>
 
         <!-- 미니게임 3 카드 -->
-        <div class="game-card minigame-card" data-game="3">
+        <div class="game-card minigame-card" data-game="3" onclick="window.startMiniGame(3)">
           <div class="card-tag">미니게임 3 (1분)</div>
           <div class="card-icon"><i class="fa-solid fa-eye"></i></div>
           <h3>2D 삼면도 보고 총 개수 맞추기</h3>
@@ -83,13 +83,13 @@
           <div class="card-reward-tier">
             <span>⚡ 30초내: 20G</span> | <span>🏃 50초내: 10G</span> | <span>5G</span>
           </div>
-          <button class="btn btn-primary btn-play">도전하기 (1분)</button>
+          <button class="btn btn-primary btn-play" onclick="window.startMiniGame(3); event.stopPropagation();">도전하기 (1분)</button>
         </div>
       </div>
 
       <!-- UI 하단 배치: 대형 보스 레이드 카드 -->
       <div class="boss-section-container">
-        <div class="game-card boss-card-banner" id="boss-card">
+        <div class="game-card boss-card-banner" id="boss-card" onclick="window.startBossRaid()">
           <div class="boss-banner-header">
             <div class="card-tag tag-boss"><i class="fa-solid fa-dragon"></i> 최종 챌린지</div>
             <div class="card-cost"><i class="fa-solid fa-coins"></i> 입장 자격: <strong>37 Gold 이상</strong></div>
@@ -101,7 +101,7 @@
               <h3>대형 삼면도 보스전 레이드 (4x4x4 무작위 60% 이하)</h3>
               <p>모은 골드가 <strong>37 Gold 이상</strong>이면 참여 가능! 4x4x4 공간에서 <strong>60% 이하(최대 38개)</strong>로 무작위 생성되는 다양한 대형 삼면도를 보고 3D로 완성하세요!</p>
             </div>
-            <button id="btn-start-boss" class="btn btn-danger btn-lg">🐉 삼면도 보스전 출전! (37G)</button>
+            <button id="btn-start-boss" class="btn btn-danger btn-lg" onclick="window.startBossRaid(); event.stopPropagation();">🐉 삼면도 보스전 출전! (37G)</button>
           </div>
         </div>
       </div>
