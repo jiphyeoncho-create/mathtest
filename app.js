@@ -1145,6 +1145,16 @@ window.startMiniGame = runStartMiniGame;
 window.startBossRaid = runStartBossRaid;
 window.showScreen = runShowScreen;
 
+if (window._pendingGame) {
+  const pGame = window._pendingGame;
+  window._pendingGame = null;
+  runStartMiniGame(pGame);
+}
+if (window._pendingBoss) {
+  window._pendingBoss = null;
+  runStartBossRaid();
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {

@@ -13,6 +13,27 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <link rel="stylesheet" href="style.css">
+  <script>
+    window.startMiniGame = function(gameType) {
+      if (typeof runStartMiniGame === 'function') {
+        runStartMiniGame(gameType);
+      } else {
+        window._pendingGame = gameType;
+      }
+    };
+    window.startBossRaid = function() {
+      if (typeof runStartBossRaid === 'function') {
+        runStartBossRaid();
+      } else {
+        window._pendingBoss = true;
+      }
+    };
+    window.showScreen = function(screenId) {
+      if (typeof runShowScreen === 'function') {
+        runShowScreen(screenId);
+      }
+    };
+  </script>
 </head>
 <body>
   <div id="app-container">
