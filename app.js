@@ -1,11 +1,7 @@
-// 쌓기나무 마스터: 메인 게임 로직 (최종 수정 기획안 완벽 반영)
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// 쌓기나무 마스터: 메인 게임 로직 (완전 독립 실행 보장형)
 
 // ==========================================
-// 1. Firebase Config
+// 1. Firebase Config & Dynamic Loader
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
   apiKey: "AIzaSyAFFAvwM5DznWnLmVbt6RdPKnJVPqII7vM",
@@ -16,18 +12,28 @@ const firebaseConfig = window.__FIREBASE_CONFIG__ || {
   appId: "1:241580484950:web:996455c6366b095b9f4ef7"
 };
 
-let app, auth, db;
+let app = null, auth = null, db = null;
 let isFirebaseActive = false;
+let fbAuthMethods = {};
 
-try {
-  if (firebaseConfig.apiKey) {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    isFirebaseActive = true;
+// Firebase 동적 로더 (실패하더라도 게임 실행에 영향 0%)
+async function initFirebase() {
+  try {
+    const fbApp = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+    const fbAuth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+    const fbFs = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    if (firebaseConfig.apiKey) {
+      app = fbApp.initializeApp(firebaseConfig);
+      auth = fbAuth.getAuth(app);
+      db = fbFs.getFirestore(app);
+      isFirebaseActive = true;
+      fbAuthMethods = { ...fbAuth, ...fbFs };
+      setupAuthListeners();
+    }
+  } catch (e) {
+    console.warn("Firebase Dynamic Load Fallback (Local Storage Mode):", e);
   }
-} catch (e) {
-  console.warn("Firebase Local Storage Fallback Mode:", e);
 }
 
 // ==========================================
@@ -875,9 +881,9 @@ async function saveHallOfFameRecord(timeSec) {
   localHof.sort((a, b) => a.timeSec - b.timeSec);
   localStorage.setItem('cube_hof', JSON.stringify(localHof.slice(0, 20)));
 
-  if (isFirebaseActive && db) {
+  if (isFirebaseActive && db && fbAuthMethods.addDoc) {
     try {
-      await addDoc(collection(db, "leaderboard"), record);
+      await fbAuthMethods.addDoc(fbAuthMethods.collection(db, "leaderboard"), record);
     } catch (e) {
       console.warn("Firestore save error:", e);
     }
@@ -886,14 +892,14 @@ async function saveHallOfFameRecord(timeSec) {
 
 async function renderHallOfFame() {
   const tbody = document.getElementById('hof-tbody');
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">기록 로딩 중...</td></tr>';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">기록 로딩 중...</td></tr>';
 
   let records = [];
 
-  if (isFirebaseActive && db) {
+  if (isFirebaseActive && db && fbAuthMethods.getDocs) {
     try {
-      const q = query(collection(db, "leaderboard"), orderBy("timeSec", "asc"), limit(15));
-      const querySnapshot = await getDocs(q);
+      const q = fbAuthMethods.query(fbAuthMethods.collection(db, "leaderboard"), fbAuthMethods.orderBy("timeSec", "asc"), fbAuthMethods.limit(15));
+      const querySnapshot = await fbAuthMethods.getDocs(q);
       querySnapshot.forEach((doc) => {
         records.push(doc.data());
       });
@@ -905,6 +911,8 @@ async function renderHallOfFame() {
   if (records.length === 0) {
     records = JSON.parse(localStorage.getItem('cube_hof') || '[]');
   }
+
+  if (!tbody) return;
 
   if (records.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">등록된 명예의 전당 기록이 없습니다. 삼면도 보스전에 첫 도전자가 되어보세요!</td></tr>';
@@ -950,8 +958,8 @@ function setupAuthListeners() {
     btnLoginModal.onclick = () => modalAuth.classList.remove('hidden');
   }
 
-  if (isFirebaseActive && auth) {
-    onAuthStateChanged(auth, (user) => {
+  if (isFirebaseActive && auth && fbAuthMethods.onAuthStateChanged) {
+    fbAuthMethods.onAuthStateChanged(auth, (user) => {
       if (user) {
         state.user.uid = user.uid;
         state.user.name = user.displayName || (nicknameInput ? nicknameInput.value : '') || '익명 탐험가';
@@ -977,9 +985,9 @@ function setupAuthListeners() {
 
     if (btnGoogle) {
       btnGoogle.onclick = async () => {
-        const provider = new GoogleAuthProvider();
+        const provider = new fbAuthMethods.GoogleAuthProvider();
         try {
-          await signInWithPopup(auth, provider);
+          await fbAuthMethods.signInWithPopup(auth, provider);
           if (modalAuth) modalAuth.classList.add('hidden');
         } catch (e) {
           alert("Google 로그인 에러: " + e.message);
@@ -990,7 +998,7 @@ function setupAuthListeners() {
     if (btnAnon) {
       btnAnon.onclick = async () => {
         try {
-          await signInAnonymously(auth);
+          await fbAuthMethods.signInAnonymously(auth);
           if (modalAuth) modalAuth.classList.add('hidden');
         } catch (e) {
           alert("익명 로그인 에러: " + e.message);
@@ -1000,7 +1008,7 @@ function setupAuthListeners() {
 
     if (btnLogout) {
       btnLogout.onclick = () => {
-        signOut(auth);
+        fbAuthMethods.signOut(auth);
         if (modalAuth) modalAuth.classList.add('hidden');
       };
     }
@@ -1070,6 +1078,7 @@ function initApp() {
   });
 
   setupAuthListeners();
+  initFirebase(); // 비동기 파이어베이스 초기화 (게임 실행 영향 0%)
 }
 
 // 글로벌 window 객체 바인딩 (HTML direct onclick 100% 지원)
