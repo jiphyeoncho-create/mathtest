@@ -5,15 +5,15 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, onAuth
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. Firebase Config (보안 & 동적 환경변수 구성)
+// 1. Firebase Config (실제 프로젝트 정보 적용)
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
-  apiKey: localStorage.getItem('FIREBASE_API_KEY') || "",
-  authDomain: localStorage.getItem('FIREBASE_AUTH_DOMAIN') || "",
-  projectId: localStorage.getItem('FIREBASE_PROJECT_ID') || "",
-  storageBucket: localStorage.getItem('FIREBASE_STORAGE_BUCKET') || "",
-  messagingSenderId: localStorage.getItem('FIREBASE_MESSAGING_SENDER_ID') || "",
-  appId: localStorage.getItem('FIREBASE_APP_ID') || ""
+  apiKey: "AIzaSyAFFAvwM5DznWnLmVbt6RdPKnJVPqII7vM",
+  authDomain: "game-5364a.firebaseapp.com",
+  projectId: "game-5364a",
+  storageBucket: "game-5364a.firebasestorage.app",
+  messagingSenderId: "241580484950",
+  appId: "1:241580484950:web:996455c6366b095b9f4ef7"
 };
 
 let app, auth, db;
