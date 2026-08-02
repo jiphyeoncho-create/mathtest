@@ -197,6 +197,14 @@ class IsoCubeRenderer {
     ctx.fillStyle = this.adjustColor(color, -25);
     ctx.fill();
     ctx.stroke();
+
+    // 2층 이상 올라간 큐브 상단 윗면에 [2층], [3층] 수치 배지 표시 (착시 0% 해소)
+    if (gz >= 1) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px Jua, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${gz + 1}층`, x, y - h - ch + 4);
+    }
   }
 
   drawGridFloorWithAxis() {
@@ -537,13 +545,26 @@ function startMiniGame(gameType) {
 
   if (gameType === 1) {
     // ========================================================
-    // [미니게임 1] 입체모형 보고 (위/앞/옆) 3x3 모눈종이에 그리기 (40초, 가로 3열 배치)
+    // [미니게임 1] 입체모형 보고 (위/앞/옆) 3x3 모눈종이에 그리기 (40초)
+    // - 착시 현상 방지를 위해 1층 높이(Max 1층) 중심의 명확한 입체모형 생성
     // ========================================================
     document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 3x3 모눈종이에 모양 그리기';
     gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 방향</strong>을 참고해 3x3 모눈종이를 클릭해 칠해보세요!';
     
     renderer = new IsoCubeRenderer(canvas, 3);
-    const { grid, total } = generateRandomStructure(4, 9, 3);
+    
+    // 1층 높이(Max 1층) 기반 100% 직관적 문제 생성 (착시 0%)
+    const grid = Array(3).fill().map(() => Array(3).fill(0));
+    let count = 0;
+    const targetCount = 4 + Math.floor(Math.random() * 3); // 4~6개
+    while (count < targetCount) {
+      const rx = Math.floor(Math.random() * 3);
+      const ry = Math.floor(Math.random() * 3);
+      if (grid[rx][ry] === 0) {
+        grid[rx][ry] = 1;
+        count++;
+      }
+    }
     state.targetGrid = grid;
 
     posGuide.classList.remove('hidden');
