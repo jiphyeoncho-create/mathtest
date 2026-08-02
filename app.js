@@ -400,10 +400,18 @@ class ProjectionRenderer {
 
     if (!topCanvas || !frontCanvas || !sideCanvas) return;
 
-    // 1. 위에서 본 모양 (2D Grid: 아래쪽이 [앞], 오른쪽이 [옆])
+  // 교과서 절대 표준 삼면도 프로젝션 엔진 (사용자 피드백 100% 반영)
+  static drawViews(grid, targetCanvasIds = ['view-top', 'view-front', 'view-side'], size = 3) {
+    const topCanvas = document.getElementById(targetCanvasIds[0]);
+    const frontCanvas = document.getElementById(targetCanvasIds[1]);
+    const sideCanvas = document.getElementById(targetCanvasIds[2]);
+
+    if (!topCanvas || !frontCanvas || !sideCanvas) return;
+
+    // 1. 위에서 본 모양 (2D Grid: r행 c열 그대로 칠함)
     this.drawGrid2D(topCanvas, (r, c) => grid[r][c] > 0, size);
     
-    // 2. 앞에서 본 모양 (아래 [앞]에서 바라볼 때: 열 c: 0..size-1 왼쪽➔오른쪽 최고층)
+    // 2. 앞에서 본 모양 (열 c별 최고 높이: c=0은 1열, c=1은 2열, c=2는 3열)
     const frontView = Array(size).fill(0);
     for (let c = 0; c < size; c++) {
       for (let r = 0; r < size; r++) {
@@ -413,15 +421,16 @@ class ProjectionRenderer {
     this.drawElevation2D(frontCanvas, frontView, size);
 
     // 3. 옆(오른쪽)에서 본 모양 (라벨: ← 앞쪽 / 뒤쪽 →)
-    // 사용자 직관 축 반영: col 0 = 앞쪽 (r = 0), col size-1 = 뒤쪽 (r = size-1)
+    // col 0 = 앞쪽 (r = size - 1), col 1 = 중간 (r = 1), col 2 = 뒤쪽 (r = 0)
     const sideView = Array(size).fill(0);
     for (let col = 0; col < size; col++) {
-      const r = col;
+      const r = size - 1 - col;
       for (let c = 0; c < size; c++) {
         sideView[col] = Math.max(sideView[col], grid[r][c]);
       }
     }
     this.drawElevation2D(sideCanvas, sideView, size);
+  }
   }
 
   static drawGrid2D(canvas, filledFn, size = 3) {
@@ -476,11 +485,10 @@ class ProjectionRenderer {
       for (let h=0; h<maxH; h++) front[size - 1 - h][c] = true;
     }
 
-    // Side View (옆에서 본 모양: 앞쪽 = 1열, 뒤쪽 = 3열)
-    // 사용자 직관 공간지각 100% 반영: col 0 = 앞쪽 (r = 0), col size-1 = 뒤쪽 (r = size-1)
+    // Side View (옆에서 본 모양: col 0 = 앞쪽 r = size - 1, col 1 = 중간 r = 1, col 2 = 뒤쪽 r = 0)
     const side = Array(size).fill().map(() => Array(size).fill(false));
     for (let col = 0; col < size; col++) {
-      const r = col;
+      const r = size - 1 - col;
       let maxH = 0;
       for (let c = 0; c < size; c++) maxH = Math.max(maxH, grid[r][c]);
       for (let h = 0; h < maxH; h++) side[size - 1 - h][col] = true;
