@@ -195,64 +195,92 @@ class IsoCubeRenderer {
 
   drawGridFloorWithAxis() {
     const size = this.gridSize;
+    const ctx = this.ctx;
+
+    // 1. 바닥 점선 격자 렌더링
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const { x: sx, y: sy } = this.toScreen(x, y, 0);
         const w = this.tileWidth / 2;
         const h = this.tileHeight / 2;
-        this.ctx.beginPath();
-        this.ctx.moveTo(sx, sy);
-        this.ctx.lineTo(sx + w, sy - h);
-        this.ctx.lineTo(sx, sy - 2 * h);
-        this.ctx.lineTo(sx - w, sy - h);
-        this.ctx.closePath();
-        this.ctx.fillStyle = 'rgba(51, 65, 85, 0.4)';
-        this.ctx.fill();
-        this.ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
-        this.ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + w, sy - h);
+        ctx.lineTo(sx, sy - 2 * h);
+        ctx.lineTo(sx - w, sy - h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
+        ctx.fill();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset line dash
       }
     }
 
-    // 사진 속 교과서 표준 방향 라벨 렌더링
-    // 1. [앞] 라벨 (왼쪽 아래 방향)
-    const frontPos = this.toScreen(0, size - 1, 0);
-    const ctx = this.ctx;
-    
     ctx.save();
-    // [앞] 분홍색 배지
+
+    // 2. [위] 초록색 배지 (상단 중앙 `↓ 위`)
+    const topPos = { x: this.canvas.width / 2, y: 22 };
+    ctx.fillStyle = '#dcfce7';
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(topPos.x - 22, topPos.y - 10, 44, 22, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#15803d';
+    ctx.font = 'bold 13px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('위', topPos.x, topPos.y + 5);
+
+    // 초록색 화살표 ↓
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('↓', topPos.x, topPos.y + 22);
+
+    // 3. [앞] 분홍색 배지 (왼쪽 아래 `↗ 앞`)
+    const frontPos = this.toScreen(0, size - 1, 0);
     ctx.fillStyle = '#fce7f3';
     ctx.strokeStyle = '#f43f5e';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.roundRect(frontPos.x - 30, frontPos.y + 14, 46, 22, 6);
+    ctx.roundRect(frontPos.x - 48, frontPos.y + 14, 46, 22, 6);
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#be123c';
     ctx.font = 'bold 13px Jua, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('앞 ➔', frontPos.x - 7, frontPos.y + 30);
+    ctx.fillText('앞', frontPos.x - 25, frontPos.y + 30);
 
-    // 2. [옆] 라벨 (오른쪽 아래 방향)
+    // 분홍색 화살표 ↗
+    ctx.fillStyle = '#f43f5e';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('↗', frontPos.x + 4, frontPos.y + 26);
+
+    // 4. [옆] 파란색 배지 (오른쪽 아래 `↖ 옆`)
     const sidePos = this.toScreen(size - 1, size - 1, 0);
-    ctx.fillStyle = '#fef3c7';
-    ctx.strokeStyle = '#d97706';
+    ctx.fillStyle = '#dbeafe';
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.roundRect(sidePos.x + 8, sidePos.y + 10, 46, 22, 6);
+    ctx.roundRect(sidePos.x + 8, sidePos.y + 14, 46, 22, 6);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#92400e';
-    ctx.fillText('옆 ➔', sidePos.x + 31, sidePos.y + 26);
+    ctx.fillStyle = '#1d4ed8';
+    ctx.font = 'bold 13px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('옆', sidePos.x + 31, sidePos.y + 30);
 
-    // 3. 층수 라벨 (1층, 2층, 3층...)
-    for (let z = 0; z < size; z++) {
-      const p = this.toScreen(0, 0, z);
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = '11px Jua, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(`${z + 1}층 ➔`, p.x - (this.tileWidth / 2) - 8, p.y - 8);
-    }
+    // 파란색 화살표 ↖
+    ctx.fillStyle = '#3b82f6';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('↖', sidePos.x - 2, sidePos.y + 26);
+
     ctx.restore();
   }
 
@@ -260,7 +288,29 @@ class IsoCubeRenderer {
     this.clear();
     this.drawGridFloorWithAxis();
     const size = this.gridSize;
+    const ctx = this.ctx;
 
+    // 1. 각 기둥 위치마다 바닥 점선 격자로 수직 하강하는 하늘색 투영 점선 렌더링 (사진속 가이드 점선)
+    ctx.save();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.2;
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        const height = grid[x][y];
+        if (height > 0) {
+          const topPoint = this.toScreen(x, y, height);
+          const floorPoint = this.toScreen(x, y, 0);
+          ctx.beginPath();
+          ctx.moveTo(topPoint.x, topPoint.y);
+          ctx.lineTo(floorPoint.x, floorPoint.y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.restore();
+
+    // 2. 3D 큐브 블록들 렌더링
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const height = grid[x][y];
