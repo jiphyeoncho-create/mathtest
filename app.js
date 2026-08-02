@@ -1,11 +1,13 @@
 // 쌓기나무 마스터: 메인 게임 로직 (100% Pure Vanilla JS, 완전 독립 실행 보장)
 
 // ==========================================
-// 0. 글로벌 바인딩 (최상단 즉시 노출 - 100% 클릭 보장)
+// 0. 글로벌 바인딩 (함수명 충돌 없는 100% 직결 연결)
 // ==========================================
 window.startMiniGame = function(gameType) {
   try {
-    if (typeof startMiniGame === 'function') startMiniGame(gameType);
+    if (typeof runStartMiniGame === 'function') {
+      runStartMiniGame(gameType);
+    }
   } catch (e) {
     console.error("startMiniGame Error:", e);
   }
@@ -13,7 +15,9 @@ window.startMiniGame = function(gameType) {
 
 window.startBossRaid = function() {
   try {
-    if (typeof startBossRaid === 'function') startBossRaid();
+    if (typeof runStartBossRaid === 'function') {
+      runStartBossRaid();
+    }
   } catch (e) {
     console.error("startBossRaid Error:", e);
   }
@@ -21,7 +25,9 @@ window.startBossRaid = function() {
 
 window.showScreen = function(screenId) {
   try {
-    if (typeof showScreen === 'function') showScreen(screenId);
+    if (typeof runShowScreen === 'function') {
+      runShowScreen(screenId);
+    }
   } catch (e) {
     console.error("showScreen Error:", e);
   }
@@ -519,7 +525,7 @@ function updateStatsUI() {
   localStorage.setItem('cube_clears', state.clears);
 }
 
-function showScreen(screenId) {
+function runShowScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(screenId);
   if (target) target.classList.add('active');
@@ -546,11 +552,11 @@ function generateRandomStructure(minCubes = 4, maxCubes = 9, size = 3) {
   return { grid: g, total: totalCubes };
 }
 
-function startMiniGame(gameType) {
+function runStartMiniGame(gameType) {
   sound.click();
   state.currentGame = gameType;
   state.startTimeMs = Date.now();
-  showScreen('screen-game');
+  runShowScreen('screen-game');
 
   const canvas = document.getElementById('main-canvas');
   if (!renderer) renderer = new IsoCubeRenderer(canvas, 3);
@@ -799,7 +805,7 @@ function startTimer(seconds) {
       } else {
         alert('⏰ 시간이 초과되었습니다! 실패!');
       }
-      showScreen('screen-dashboard');
+      runShowScreen('screen-dashboard');
     }
   }, 1000);
 }
@@ -807,7 +813,7 @@ function startTimer(seconds) {
 // ==========================================
 // 7. 대형 삼면도 보스전 (37 Gold 이상 참여 자격)
 // ==========================================
-function startBossRaid() {
+function runStartBossRaid() {
   sound.click();
   const BOSS_ENTRY_FEE = 37; // 37 Gold 이상 진입 자격
 
@@ -1093,19 +1099,19 @@ function initApp() {
     document.querySelectorAll('.minigame-card').forEach(card => {
       card.onclick = (e) => {
         const gType = parseInt(card.dataset.game, 10);
-        if (gType) startMiniGame(gType);
+        if (gType) runStartMiniGame(gType);
       };
     });
 
     const bossBtn = document.getElementById('btn-start-boss');
-    if (bossBtn) bossBtn.onclick = startBossRaid;
+    if (bossBtn) bossBtn.onclick = runStartBossRaid;
 
     document.querySelectorAll('.btn-back-dashboard').forEach(btn => {
       btn.onclick = () => {
         try { sound.click(); } catch(e){}
         clearInterval(state.gameTimer);
         clearInterval(state.boss.timerInterval);
-        showScreen('screen-dashboard');
+        runShowScreen('screen-dashboard');
       };
     });
 
@@ -1142,10 +1148,10 @@ function initApp() {
   }
 }
 
-// 글로벌 window 객체 바인딩 (HTML direct onclick 100% 지원)
-window.startMiniGame = startMiniGame;
-window.startBossRaid = startBossRaid;
-window.showScreen = showScreen;
+// 글로벌 window 객체 바인딩 (HTML direct onclick 100% 직결)
+window.startMiniGame = runStartMiniGame;
+window.startBossRaid = runStartBossRaid;
+window.showScreen = runShowScreen;
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
