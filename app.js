@@ -1,37 +1,29 @@
 // 쌓기나무 마스터: 메인 게임 로직 (100% Pure Vanilla JS, 완전 독립 실행 보장)
 
 // ==========================================
-// 0. 글로벌 바인딩 (함수명 충돌 없는 100% 직결 연결)
+// 0. 글로벌 바인딩 (100% 직관 직결)
 // ==========================================
-window.startMiniGame = function(gameType) {
-  try {
-    if (typeof runStartMiniGame === 'function') {
-      runStartMiniGame(gameType);
-    }
-  } catch (e) {
-    console.error("startMiniGame Error:", e);
+function startMiniGame(gameType) {
+  if (typeof runStartMiniGame === 'function') {
+    runStartMiniGame(gameType);
   }
-};
+}
 
-window.startBossRaid = function() {
-  try {
-    if (typeof runStartBossRaid === 'function') {
-      runStartBossRaid();
-    }
-  } catch (e) {
-    console.error("startBossRaid Error:", e);
+function startBossRaid() {
+  if (typeof runStartBossRaid === 'function') {
+    runStartBossRaid();
   }
-};
+}
 
-window.showScreen = function(screenId) {
-  try {
-    if (typeof runShowScreen === 'function') {
-      runShowScreen(screenId);
-    }
-  } catch (e) {
-    console.error("showScreen Error:", e);
+function showScreen(screenId) {
+  if (typeof runShowScreen === 'function') {
+    runShowScreen(screenId);
   }
-};
+}
+
+window.startMiniGame = startMiniGame;
+window.startBossRaid = startBossRaid;
+window.showScreen = showScreen;
 
 // ==========================================
 // 1. Firebase Config & Pure JS Fallback Loader
