@@ -147,15 +147,14 @@ class IsoCubeRenderer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  // 3D Isometric 좌표 ➔ 화면 스크린 좌표 변환 (첫번째 사진처럼 바닥 점선 격자와 3D 모형 이격 연출)
+  // 3D Isometric 좌표 ➔ 화면 스크린 좌표 변환 (두번째 가이드 이미지 100% 구현)
   toScreen(gx, gy, gz, isFloor = false) {
     const originX = this.canvas.width / 2;
-    const offsetY = this.gridSize === 4 ? 45 : 35;
-    const originY = this.canvas.height / 2 + offsetY;
+    const originY = this.canvas.height - (this.gridSize === 4 ? 65 : 75);
     const sx = originX + (gx - gy) * (this.tileWidth / 2);
     
-    // 바닥 격자와 3D 쌓기나무 사이를 이격(Floating Offset)시키는 오프셋 (첫번째 가이드 이미지 구현)
-    const floatElevation = isFloor ? 0 : (this.cubeHeight * 1.5);
+    // 바닥 격자와 3D 모형 사이를 공중에 붕 띄우는 이격 오프셋 (두번째 가이드 이미지와 동일)
+    const floatElevation = isFloor ? 0 : (this.cubeHeight * 1.6);
     const sy = originY + (gx + gy) * (this.tileHeight / 2) - floatElevation - gz * this.cubeHeight;
     return { x: sx, y: sy };
   }
@@ -176,7 +175,7 @@ class IsoCubeRenderer {
     ctx.closePath();
     ctx.fillStyle = this.adjustColor(color, 25);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.lineWidth = 1.2;
     ctx.stroke();
 
@@ -215,7 +214,7 @@ class IsoCubeRenderer {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 바닥 점선 모눈 격자 전체 렌더링 (첫번째 사진속 맨 아래 바닥 점선 모눈)
+    // 1. 맨 아래 바닥 3x3 점선 모눈 격자 전체 렌더링 (두번째 가이드 이미지 바닥 점선 모눈)
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const { x: sx, y: sy } = this.toScreen(x, y, 0, true);
@@ -228,12 +227,12 @@ class IsoCubeRenderer {
         ctx.lineTo(sx - w, sy - h);
         ctx.closePath();
         
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
         ctx.fill();
 
-        // 첫번째 사진속 또렷한 바닥 점선 모눈 (Dotted Grid)
+        // 또렷하고 선명한 바닥 점선 모눈 (Dotted Line Grid)
         ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.75)';
         ctx.lineWidth = 1.2;
         ctx.stroke();
         ctx.setLineDash([]);
@@ -242,7 +241,7 @@ class IsoCubeRenderer {
 
     ctx.save();
 
-    // [위] 초록색 배지 (상단 중앙 `↓ 위`)
+    // 2. [위] 초록색 배지 (상단 중앙 `↓ 위`)
     const topPos = { x: this.canvas.width / 2, y: 22 };
     ctx.fillStyle = '#dcfce7';
     ctx.strokeStyle = '#22c55e';
@@ -261,27 +260,27 @@ class IsoCubeRenderer {
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText('↓', topPos.x, topPos.y + 22);
 
-    // [앞] 분홍색 배지 (왼쪽 아래 `↗ 앞`)
-    const frontPos = this.toScreen(0, size - 1, 0);
+    // 3. [앞] 분홍색 배지 (바닥 왼쪽 아래 `↗ 앞`)
+    const frontPos = this.toScreen(0, size - 1, 0, true);
     ctx.fillStyle = '#fce7f3';
     ctx.strokeStyle = '#f43f5e';
     ctx.lineWidth = 1.5;
-    this.drawRoundRect(ctx, frontPos.x - 48, frontPos.y + 14, 46, 22, 6);
+    this.drawRoundRect(ctx, frontPos.x - 52, frontPos.y + 14, 46, 22, 6);
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#be123c';
     ctx.font = 'bold 13px Jua, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('앞', frontPos.x - 25, frontPos.y + 30);
+    ctx.fillText('앞', frontPos.x - 29, frontPos.y + 30);
 
     // 분홍색 화살표 ↗
     ctx.fillStyle = '#f43f5e';
     ctx.font = 'bold 14px sans-serif';
-    ctx.fillText('↗', frontPos.x + 4, frontPos.y + 26);
+    ctx.fillText('↗', frontPos.x, frontPos.y + 26);
 
-    // [옆] 파란색 배지 (오른쪽 아래 `↖ 옆`)
-    const sidePos = this.toScreen(size - 1, size - 1, 0);
+    // 4. [옆] 파란색 배지 (바닥 오른쪽 아래 `↖ 옆`)
+    const sidePos = this.toScreen(size - 1, size - 1, 0, true);
     ctx.fillStyle = '#dbeafe';
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 1.5;
@@ -323,7 +322,7 @@ class IsoCubeRenderer {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 공중에 떠 있는 3D 모형 밑면에서부터 맨 아래 바닥 점선 격자까지 수직 하강하는 하늘색 투영 점선 렌더링 (첫번째 사진 100% 구현)
+    // 1. 공중에 떠 있는 3D 모형 밑면에서부터 맨 아래 바닥 점선 모눈 격자까지 수직 하강하는 하늘색 투영 점선 렌더링 (두번째 가이드 이미지 100% 연출)
     ctx.save();
     ctx.setLineDash([4, 4]);
     ctx.strokeStyle = '#38bdf8';
