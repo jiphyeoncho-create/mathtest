@@ -928,7 +928,7 @@ async function renderHallOfFame() {
 }
 
 // ==========================================
-// 9. Auth & Global Init
+// 9. Auth & Global Init (즉시 안전 초기화)
 // ==========================================
 function setupAuthListeners() {
   const modalAuth = document.getElementById('modal-auth');
@@ -946,96 +946,134 @@ function setupAuthListeners() {
     };
   }
 
-  btnLoginModal.onclick = () => modalAuth.classList.remove('hidden');
+  if (btnLoginModal && modalAuth) {
+    btnLoginModal.onclick = () => modalAuth.classList.remove('hidden');
+  }
 
   if (isFirebaseActive && auth) {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         state.user.uid = user.uid;
-        state.user.name = user.displayName || nicknameInput.value || '익명 탐험가';
-        document.getElementById('auth-logged-out-view').classList.add('hidden');
-        document.getElementById('auth-logged-in-view').classList.remove('hidden');
-        document.getElementById('user-display-name').textContent = state.user.name;
-        document.getElementById('user-email-text').textContent = user.isAnonymous ? '익명 회원' : (user.email || 'Google 계정');
-        document.getElementById('auth-btn-text').textContent = state.user.name;
+        state.user.name = user.displayName || (nicknameInput ? nicknameInput.value : '') || '익명 탐험가';
+        const outView = document.getElementById('auth-logged-out-view');
+        const inView = document.getElementById('auth-logged-in-view');
+        if (outView) outView.classList.add('hidden');
+        if (inView) inView.classList.remove('hidden');
+        const dName = document.getElementById('user-display-name');
+        const emailTxt = document.getElementById('user-email-text');
+        const btnTxt = document.getElementById('auth-btn-text');
+        if (dName) dName.textContent = state.user.name;
+        if (emailTxt) emailTxt.textContent = user.isAnonymous ? '익명 회원' : (user.email || 'Google 계정');
+        if (btnTxt) btnTxt.textContent = state.user.name;
       } else {
-        document.getElementById('auth-logged-out-view').classList.remove('hidden');
-        document.getElementById('auth-logged-in-view').classList.add('hidden');
-        document.getElementById('auth-btn-text').textContent = '로그인';
+        const outView = document.getElementById('auth-logged-out-view');
+        const inView = document.getElementById('auth-logged-in-view');
+        const btnTxt = document.getElementById('auth-btn-text');
+        if (outView) outView.classList.remove('hidden');
+        if (inView) inView.classList.add('hidden');
+        if (btnTxt) btnTxt.textContent = '로그인';
       }
     });
 
-    btnGoogle.onclick = async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-        modalAuth.classList.add('hidden');
-      } catch (e) {
-        alert("Google 로그인 에러: " + e.message);
-      }
-    };
+    if (btnGoogle) {
+      btnGoogle.onclick = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+          await signInWithPopup(auth, provider);
+          if (modalAuth) modalAuth.classList.add('hidden');
+        } catch (e) {
+          alert("Google 로그인 에러: " + e.message);
+        }
+      };
+    }
 
-    btnAnon.onclick = async () => {
-      try {
-        await signInAnonymously(auth);
-        modalAuth.classList.add('hidden');
-      } catch (e) {
-        alert("익명 로그인 에러: " + e.message);
-      }
-    };
+    if (btnAnon) {
+      btnAnon.onclick = async () => {
+        try {
+          await signInAnonymously(auth);
+          if (modalAuth) modalAuth.classList.add('hidden');
+        } catch (e) {
+          alert("익명 로그인 에러: " + e.message);
+        }
+      };
+    }
 
-    btnLogout.onclick = () => {
-      signOut(auth);
-      modalAuth.classList.add('hidden');
-    };
+    if (btnLogout) {
+      btnLogout.onclick = () => {
+        signOut(auth);
+        if (modalAuth) modalAuth.classList.add('hidden');
+      };
+    }
   } else {
-    btnAnon.onclick = () => {
-      modalAuth.classList.add('hidden');
-      document.getElementById('auth-btn-text').textContent = state.user.name;
-    };
-    btnGoogle.onclick = () => {
-      alert("Firebase Config를 설정하면 Google 로그인을 사용할 수 있습니다!\n(현재는 로컬 프로필 모드로 작동합니다)");
-    };
+    if (btnAnon) {
+      btnAnon.onclick = () => {
+        if (modalAuth) modalAuth.classList.add('hidden');
+        const btnTxt = document.getElementById('auth-btn-text');
+        if (btnTxt) btnTxt.textContent = state.user.name;
+      };
+    }
+    if (btnGoogle) {
+      btnGoogle.onclick = () => {
+        alert("Firebase Config를 설정하면 Google 로그인을 사용할 수 있습니다!\n(현재는 로컬 프로필 모드로 작동합니다)");
+      };
+    }
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   updateStatsUI();
 
+  // 미니게임 카드 및 도전하기 버튼 클릭 바인딩
   document.querySelectorAll('.minigame-card').forEach(card => {
-    card.onclick = () => {
+    card.onclick = (e) => {
       const gType = parseInt(card.dataset.game, 10);
-      startMiniGame(gType);
+      if (gType) startMiniGame(gType);
     };
   });
 
-  document.getElementById('btn-start-boss').onclick = startBossRaid;
+  const bossBtn = document.getElementById('btn-start-boss');
+  if (bossBtn) bossBtn.onclick = startBossRaid;
 
   document.querySelectorAll('.btn-back-dashboard').forEach(btn => {
     btn.onclick = () => {
-      sound.click();
+      try { sound.click(); } catch(e){}
       clearInterval(state.gameTimer);
       clearInterval(state.boss.timerInterval);
       showScreen('screen-dashboard');
     };
   });
 
-  document.getElementById('btn-open-hof').onclick = () => {
-    sound.click();
-    renderHallOfFame();
-    document.getElementById('modal-hof').classList.remove('hidden');
-  };
+  const hofBtn = document.getElementById('btn-open-hof');
+  if (hofBtn) {
+    hofBtn.onclick = () => {
+      try { sound.click(); } catch(e){}
+      renderHallOfFame();
+      const modalHof = document.getElementById('modal-hof');
+      if (modalHof) modalHof.classList.remove('hidden');
+    };
+  }
 
-  document.getElementById('btn-how-to-play').onclick = () => {
-    sound.click();
-    document.getElementById('modal-guide').classList.remove('hidden');
-  };
+  const guideBtn = document.getElementById('btn-how-to-play');
+  if (guideBtn) {
+    guideBtn.onclick = () => {
+      try { sound.click(); } catch(e){}
+      const modalGuide = document.getElementById('modal-guide');
+      if (modalGuide) modalGuide.classList.remove('hidden');
+    };
+  }
 
   document.querySelectorAll('.btn-close-modal').forEach(btn => {
     btn.onclick = (e) => {
-      e.target.closest('.modal-overlay').classList.add('hidden');
+      const modal = e.target.closest('.modal-overlay');
+      if (modal) modal.classList.add('hidden');
     };
   });
 
   setupAuthListeners();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
