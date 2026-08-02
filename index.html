@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>쌓기나무 마스터: 삼면도 보스 레이드</title>
-  <meta name="description" content="초등학교 6학년 수학 『공간과 입체(쌓기나무)』 학습 게임! 삼면도 관찰, 모눈종이 완성, 스피드 퀴즈로 골드를 모아 27~64개 삼면도 보스전에 도전하세요!">
+  <meta name="description" content="초등학교 6학년 수학 『공간과 입체(쌓기나무)』 학습 게임! 삼면도 관찰, 모눈종이 위치 가이드, 스피드 퀴즈로 골드를 모아 37Gold로 삼면도 보스전에 도전하세요!">
   
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +47,7 @@
     <main id="screen-dashboard" class="screen active">
       <div class="hero-banner">
         <h2>🎲 쌓기나무를 연습하고 <strong>대형 삼면도 보스</strong>를 물리치자!</h2>
-        <p>3가지 미니게임으로 골드를 모아 하단의 거대 삼면도 보스전에 도전하고 명예의 전당 1위에 올라보세요.</p>
+        <p>3가지 미니게임으로 골드를 모아 <strong>37 Gold</strong>를 달성하고 삼면도 보스전에 도전해보세요!</p>
       </div>
 
       <!-- 상단 3가지 미니게임 카드 그리드 -->
@@ -57,7 +57,7 @@
           <div class="card-tag">미니게임 1 (40초)</div>
           <div class="card-icon"><i class="fa-solid fa-pen-ruler"></i></div>
           <h3>위/앞/옆 모눈종이에 그리기</h3>
-          <p>3D 쌓기나무를 관찰하고 위, 앞, 옆 모양을 모눈종이에 직접 칠해 완성하세요!</p>
+          <p>위치 일치 가이드를 참고하여 3D 쌓기나무의 (위/앞/옆) 모양을 모눈종이에 직접 칠하세요!</p>
           <div class="card-reward-tier">
             <span>⚡ 10초내: 10G</span> | <span>🏃 20초내: 5G</span> | <span>2G / 1G</span>
           </div>
@@ -69,21 +69,21 @@
           <div class="card-tag">미니게임 2 (30초 연속)</div>
           <div class="card-icon"><i class="fa-solid fa-bolt"></i></div>
           <h3>1층/2층 & 최소개수 스피드 퀴즈</h3>
-          <p>30초 동안 3D 모형의 1층/2층 높이 개수 및 최소/최대 개수 퀴즈를 연속해서 맞추세요!</p>
-          <div class="card-reward"><i class="fa-solid fa-coins"></i> 보상: <strong>문제당 +3 Gold</strong></div>
+          <p>30초 동안 3D 모형의 1층/2층 높이 개수 및 개수 퀴즈를 연속해서 맞추세요!</p>
+          <div class="card-reward"><i class="fa-solid fa-coins"></i> 보상: <strong>한 문제당 +5 Gold</strong></div>
           <button class="btn btn-primary btn-play">도전하기 (30초)</button>
         </div>
 
         <!-- 미니게임 3 카드 -->
         <div class="game-card minigame-card" data-game="3">
-          <div class="card-tag">미니게임 3 (40초)</div>
+          <div class="card-tag">미니게임 3 (1분)</div>
           <div class="card-icon"><i class="fa-solid fa-eye"></i></div>
           <h3>2D 삼면도 보고 총 개수 맞추기</h3>
           <p>제시된 위, 앞, 옆 삼면도를 분석하여 전체 쌓기나무 개수를 맞추세요!</p>
           <div class="card-reward-tier">
-            <span>⚡ 10초내: 10G</span> | <span>🏃 20초내: 5G</span> | <span>2G / 1G</span>
+            <span>⚡ 30초내: 20G</span> | <span>🏃 50초내: 10G</span> | <span>5G</span>
           </div>
-          <button class="btn btn-primary btn-play">도전하기 (40초)</button>
+          <button class="btn btn-primary btn-play">도전하기 (1분)</button>
         </div>
       </div>
 
@@ -92,16 +92,16 @@
         <div class="game-card boss-card-banner" id="boss-card">
           <div class="boss-banner-header">
             <div class="card-tag tag-boss"><i class="fa-solid fa-dragon"></i> 최종 챌린지</div>
-            <div class="card-cost"><i class="fa-solid fa-coins"></i> 입장료: <strong>150 Gold</strong></div>
+            <div class="card-cost"><i class="fa-solid fa-coins"></i> 입장 자격: <strong>37 Gold 이상</strong></div>
           </div>
 
           <div class="boss-banner-body">
             <div class="boss-banner-icon"><i class="fa-solid fa-cubes"></i></div>
             <div class="boss-banner-text">
               <h3>대형 삼면도 보스전 레이드 (27~64개 쌓기나무)</h3>
-              <p>랜덤 제시되는 <strong>대형 삼면도(위/앞/옆)</strong>를 보고, 3D 공간에 27~64개의 쌓기나무를 직접 쌓아 완성하세요!</p>
+              <p>모은 골드가 <strong>37 Gold 이상</strong>이면 참여 가능! 랜덤 제시되는 <strong>대형 삼면도(위/앞/옆)</strong>를 보고, 3D 공간에 27~64개의 쌓기나무를 직접 쌓아 완성하세요!</p>
             </div>
-            <button id="btn-start-boss" class="btn btn-danger btn-lg">🐉 삼면도 보스전 출전!</button>
+            <button id="btn-start-boss" class="btn btn-danger btn-lg">🐉 삼면도 보스전 출전! (37G)</button>
           </div>
         </div>
       </div>
@@ -141,20 +141,26 @@
         <div id="game-viewport">
           <!-- 3D / 2D 캔버스 & 모눈종이 컨테이너 -->
           <div id="canvas-container">
-            <canvas id="main-canvas" width="550" height="360"></canvas>
+            <div class="canvas-with-guide">
+              <canvas id="main-canvas" width="550" height="360"></canvas>
+              <!-- 위치 일치 안내 툴팁/가이드 -->
+              <div id="mg1-position-guide" class="position-guide-box hidden">
+                <span>💡 <strong>위치 일치 가이드:</strong> [앞]은 모눈종이의 아래쪽, [옆]은 모눈종이의 오른쪽에서 본 모습입니다.</span>
+              </div>
+            </div>
             
-            <!-- 미니게임 1: 3x3 모눈종이 입력 그리드 -->
+            <!-- 미니게임 1: 3x3 모눈종이 입력 그리드 (위치 가이드 포함) -->
             <div id="grid-paper-container" class="grid-paper-wrapper hidden">
               <div class="paper-box">
-                <h4>위에서 본 모양</h4>
+                <h4>위에서 본 모양 <span class="guide-sub">(3x3 바닥)</span></h4>
                 <div id="paper-top" class="paper-grid"></div>
               </div>
               <div class="paper-box">
-                <h4>앞에서 본 모양</h4>
+                <h4>앞에서 본 모양 <span class="guide-sub">(열별 최고층)</span></h4>
                 <div id="paper-front" class="paper-grid"></div>
               </div>
               <div class="paper-box">
-                <h4>옆에서 본 모양</h4>
+                <h4>옆에서 본 모양 <span class="guide-sub">(행별 최고층)</span></h4>
                 <div id="paper-side" class="paper-grid"></div>
               </div>
             </div>
@@ -299,14 +305,14 @@
         </div>
         <div class="modal-body">
           <div class="guide-item">
-            <h4>1. 삼면도(위, 앞, 옆) 그리기 팁</h4>
-            <p><strong>위:</strong> 위에서 내려다보았을 때 바닥의 위치에 쌓기나무가 존재하면 모눈종이를 칠합니다.</p>
-            <p><strong>앞:</strong> 앞에서 보았을 때 각 열(세로줄)마다 보이는 가장 높은 층수만큼 칸을 위로 칠합니다.</p>
-            <p><strong>옆:</strong> 옆(오른쪽)에서 보았을 때 각 행(가로줄)마다 가장 높은 층수만큼 칸을 위로 칠합니다.</p>
+            <h4>1. 모눈종이 위치 일치 가이드</h4>
+            <p><strong>위:</strong> 위에서 내려다본 바닥 위치 그대로 칠합니다.</p>
+            <p><strong>앞:</strong> 앞에서 보았을 때 세로줄(열)별로 가장 높은 쌓기나무 층수만큼 아래부터 위로 칠합니다.</p>
+            <p><strong>옆:</strong> 옆(오른쪽)에서 보았을 때 가로줄(행)별로 가장 높은 쌓기나무 층수만큼 아래부터 위로 칠합니다.</p>
           </div>
           <div class="guide-item">
-            <h4>2. 보스전 대형 삼면도 팁 (27~64개)</h4>
-            <p>위에서 본 모양에 숫자를 적어 각 위치의 높이를 지정하면, 삼면도를 완벽히 만족하는 3D 입체를 완성할 수 있습니다!</p>
+            <h4>2. 보스전 도전 자격 (37 Gold)</h4>
+            <p>미니게임을 플레이하여 <strong>37 Gold</strong>를 모으면 바로 보스전에 출전할 수 있습니다!</p>
           </div>
         </div>
         <div class="modal-footer">

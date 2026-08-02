@@ -1,11 +1,11 @@
-// 쌓기나무 마스터: 메인 게임 로직 (수정 기획안 완벽 반영)
+// 쌓기나무 마스터: 메인 게임 로직 (최종 수정 기획안 완벽 반영)
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. Firebase Config (안전한 클라이언트 설정 연동)
+// 1. Firebase Config
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
   apiKey: "AIzaSyAFFAvwM5DznWnLmVbt6RdPKnJVPqII7vM",
@@ -20,7 +20,7 @@ let app, auth, db;
 let isFirebaseActive = false;
 
 try {
-  if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("DEMO_KEY")) {
+  if (firebaseConfig.apiKey) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
@@ -118,7 +118,7 @@ const state = {
 };
 
 // ==========================================
-// 4. Dynamic 3D Isometric Cube Renderer Engine
+// 4. Dynamic 3D Isometric Cube Renderer Engine (with Axis Labels)
 // ==========================================
 class IsoCubeRenderer {
   constructor(canvas, gridSize = 3) {
@@ -193,7 +193,7 @@ class IsoCubeRenderer {
     ctx.stroke();
   }
 
-  drawGridFloor() {
+  drawGridFloorWithAxis() {
     const size = this.gridSize;
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
@@ -212,11 +212,24 @@ class IsoCubeRenderer {
         this.ctx.stroke();
       }
     }
+
+    // [앞] 및 [옆] 방향 축 가이드 텍스트 표시
+    if (size === 3) {
+      const frontPos = this.toScreen(2, 2, 0);
+      this.ctx.fillStyle = '#38bdf8';
+      this.ctx.font = 'bold 13px Jua, sans-serif';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText('▼ [앞] 보는 방향', frontPos.x, frontPos.y + 24);
+
+      const sidePos = this.toScreen(0, 2, 0);
+      this.ctx.fillStyle = '#c084fc';
+      this.ctx.fillText('[옆] ▶', sidePos.x + 36, sidePos.y + 10);
+    }
   }
 
   renderStructure(grid) {
     this.clear();
-    this.drawGridFloor();
+    this.drawGridFloorWithAxis();
     const size = this.gridSize;
 
     for (let x = 0; x < size; x++) {
@@ -315,7 +328,6 @@ class ProjectionRenderer {
     }
   }
 
-  // 삼면도 데이터 추출 함수 (검증용)
   static getProjections(grid, size = 3) {
     const top = Array(size).fill().map(() => Array(size).fill(false));
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) if (grid[r][c] > 0) top[r][c] = true;
@@ -389,12 +401,14 @@ function startMiniGame(gameType) {
   const gameControls = document.getElementById('game-controls');
   const gamePrompt = document.getElementById('game-prompt');
   const scoreBadge = document.getElementById('minigame-score-badge');
+  const posGuide = document.getElementById('mg1-position-guide');
 
   // Clear UI states
   canvas.classList.remove('hidden');
   paperWrapper.classList.add('hidden');
   viewProjections.classList.add('hidden');
   scoreBadge.classList.add('hidden');
+  posGuide.classList.add('hidden');
   gameControls.innerHTML = '';
 
   const { grid, total } = generateRandomStructure(4, 9, 3);
@@ -402,11 +416,12 @@ function startMiniGame(gameType) {
 
   if (gameType === 1) {
     // ========================================================
-    // [미니게임 1] 입체모형 보고 (위/앞/옆) 모눈종이에 그리기 (40초)
+    // [미니게임 1] 입체모형 보고 (위/앞/옆) 모눈종이에 그리기 (40초, 위치 가이드 포함)
     // ========================================================
     document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 모눈종이에 모양 그리기';
-    gamePrompt.innerHTML = '🎨 제시된 3D 쌓기나무를 보고 오른쪽에 위치한 <strong>(위/앞/옆) 모눈종이를 클릭해 똑같이 칠해보세요!</strong>';
+    gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 보는 방향 가이드</strong>를 참고해 모눈종이를 클릭해 칠하세요!';
     
+    posGuide.classList.remove('hidden');
     renderer.renderStructure(grid);
     paperWrapper.classList.remove('hidden');
     initPaperGridUI(grid);
@@ -421,7 +436,7 @@ function startMiniGame(gameType) {
 
   } else if (gameType === 2) {
     // ========================================================
-    // [미니게임 2] 30초 동안 1층/2층/최소개수 연속 스피드 퀴즈 (문제당 3G)
+    // [미니게임 2] 30초 동안 1층/2층/최소개수 연속 스피드 퀴즈 (문제당 5G 적립)
     // ========================================================
     document.getElementById('game-title').textContent = '미니게임 2: 층별 & 최소/최대 개수 30초 스피드 퀴즈!';
     scoreBadge.classList.remove('hidden');
@@ -435,9 +450,9 @@ function startMiniGame(gameType) {
 
   } else if (gameType === 3) {
     // ========================================================
-    // [미니게임 3] 2D 삼면도 모양 보고 전체 개수 맞추기 (40초)
+    // [미니게임 3] 2D 삼면도 모양 보고 전체 개수 맞추기 (1분 타임어택, 30s: 20G / 50s: 10G / 60s: 5G)
     // ========================================================
-    document.getElementById('game-title').textContent = '미니게임 3: 2D 삼면도 보고 총 개수 맞추기';
+    document.getElementById('game-title').textContent = '미니게임 3: 2D 삼면도 보고 총 개수 맞추기 (1분)';
     gamePrompt.innerHTML = '🔍 제시된 <strong>위, 앞, 옆 삼면도</strong>를 보고 전체 쌓기나무 개수를 맞추세요!';
 
     canvas.classList.add('hidden');
@@ -456,7 +471,7 @@ function startMiniGame(gameType) {
       gameControls.appendChild(btn);
     });
 
-    startTimer(40);
+    startTimer(60); // 1분 (60초)
   }
 }
 
@@ -499,7 +514,7 @@ function submitMiniGame1() {
   submitTimedMiniGame(1, isCorrect);
 }
 
-// 소요시간대별 골드 차등 지급 로직 (10초내 10G, 20초내 5G, 30초내 2G, 40초내 1G)
+// 미니게임 소요시간대별 골드 차등 지급 로직 (미니게임 1 & 미니게임 3)
 function submitTimedMiniGame(gameType, isCorrect) {
   clearInterval(state.gameTimer);
   const elapsedSec = (Date.now() - state.startTimeMs) / 1000;
@@ -507,9 +522,19 @@ function submitTimedMiniGame(gameType, isCorrect) {
   if (isCorrect) {
     sound.correct();
     let earnedGold = 1;
-    if (elapsedSec <= 10) earnedGold = 10;
-    else if (elapsedSec <= 20) earnedGold = 5;
-    else if (elapsedSec <= 30) earnedGold = 2;
+
+    if (gameType === 3) {
+      // 미니게임 3 보상 규칙: 30초 이내 20G, 30~50초 10G, 50~60초 5G
+      if (elapsedSec <= 30) earnedGold = 20;
+      else if (elapsedSec <= 50) earnedGold = 10;
+      else earnedGold = 5;
+    } else {
+      // 미니게임 1 보상 규칙: 10초 이내 10G, 20초 이내 5G, 30초 이내 2G, 40초 이내 1G
+      if (elapsedSec <= 10) earnedGold = 10;
+      else if (elapsedSec <= 20) earnedGold = 5;
+      else if (elapsedSec <= 30) earnedGold = 2;
+      else earnedGold = 1;
+    }
 
     state.gold += earnedGold;
     state.clears++;
@@ -518,13 +543,13 @@ function submitTimedMiniGame(gameType, isCorrect) {
     alert(`🎉 정답입니다! 완주 성공!\n⏱️ 소요 시간: ${elapsedSec.toFixed(1)}초\n💰 획득 골드: +${earnedGold} Gold!`);
   } else {
     sound.wrong();
-    alert('❌ 아쉽네요, 모눈종이 또는 개수가 일치하지 않습니다.');
+    alert('❌ 아쉽네요, 답이 일치하지 않습니다.');
   }
 
   showScreen('screen-dashboard');
 }
 
-// 미니게임 2 연속 퀴즈 렌더러
+// 미니게임 2 연속 퀴즈 렌더러 (한 문제당 5G 적립)
 function renderNextSpeedQuiz() {
   const gameControls = document.getElementById('game-controls');
   const gamePrompt = document.getElementById('game-prompt');
@@ -540,13 +565,13 @@ function renderNextSpeedQuiz() {
 
   if (qType === 'layer1') {
     for (let r=0; r<3; r++) for (let c=0; c<3; c++) if (grid[r][c] >= 1) correctAnswer++;
-    gamePrompt.innerHTML = '⚡ <strong>1층(바닥)에 놓인 쌓기나무</strong>는 몇 개일까요?';
+    gamePrompt.innerHTML = '⚡ <strong>1층(바닥)에 놓인 쌓기나무</strong>는 몇 개일까요? (+5G)';
   } else if (qType === 'layer2') {
     for (let r=0; r<3; r++) for (let c=0; c<3; c++) if (grid[r][c] >= 2) correctAnswer++;
-    gamePrompt.innerHTML = '⚡ <strong>2층 이상으로 올라간 쌓기나무</strong>는 몇 개일까요?';
+    gamePrompt.innerHTML = '⚡ <strong>2층 이상으로 올라간 쌓기나무</strong>는 몇 개일까요? (+5G)';
   } else {
     correctAnswer = total;
-    gamePrompt.innerHTML = '⚡ 3D 입체모형에 사용된 <strong>전체 쌓기나무 개수</strong>는 몇 개일까요?';
+    gamePrompt.innerHTML = '⚡ 3D 입체모형에 사용된 <strong>전체 쌓기나무 개수</strong>는 몇 개일까요? (+5G)';
   }
 
   const options = new Set([correctAnswer]);
@@ -561,8 +586,8 @@ function renderNextSpeedQuiz() {
       if (opt === correctAnswer) {
         sound.correct();
         state.mg2Score++;
-        state.mg2GoldEarned += 3;
-        state.gold += 3;
+        state.mg2GoldEarned += 5; // 한 문제당 5G 적립
+        state.gold += 5;
         updateStatsUI();
         document.getElementById('mg2-score').textContent = state.mg2Score;
         document.getElementById('mg2-gold').textContent = state.mg2GoldEarned;
@@ -601,48 +626,40 @@ function startTimer(seconds) {
 }
 
 // ==========================================
-// 7. 대형 삼면도 보스전 (27~64개 삼면도 보고 직접 쌓기)
+// 7. 대형 삼면도 보스전 (37 Gold 이상 참여 자격)
 // ==========================================
 function startBossRaid() {
   sound.click();
-  const BOSS_ENTRY_FEE = 150;
+  const BOSS_ENTRY_FEE = 37; // 37 Gold 이상 진입 자격
 
   if (state.gold < BOSS_ENTRY_FEE) {
     sound.wrong();
-    alert(`🔒 골드가 부족합니다!\n대형 삼면도 보스전 출전에는 ${BOSS_ENTRY_FEE} Gold가 필요합니다. (현재: ${state.gold} Gold)`);
+    alert(`🔒 골드가 부족합니다!\n대형 삼면도 보스전 출전에는 최소 ${BOSS_ENTRY_FEE} Gold가 필요합니다. (현재: ${state.gold} Gold)`);
     return;
   }
 
-  if (!confirm(`🐉 대형 삼면도 보스전에 도전하시겠습니까?\n입장료 ${BOSS_ENTRY_FEE} Gold가 차감됩니다.`)) return;
+  if (!confirm(`🐉 대형 삼면도 보스전에 도전하시겠습니까?\n(37 Gold 이상 보유 조건 충족!)`)) return;
 
-  state.gold -= BOSS_ENTRY_FEE;
-  updateStatsUI();
-
-  // Generate 4x4x4 structure (27 ~ 64 cubes)
+  // Boss전 실행
   const size = 4;
   const { grid, total } = generateRandomStructure(27, 64, size);
   state.targetGrid = grid;
   state.boss.targetCubes = total;
   state.boss.size = size;
 
-  // Initialize 4x4 User Grid
   state.userGrid = Array(size).fill().map(() => Array(size).fill(0));
 
   showScreen('screen-boss');
   document.getElementById('boss-target-count').textContent = total;
 
-  // Draw 2D Projections for Boss
   ProjectionRenderer.drawViews(grid, ['boss-view-top', 'boss-view-front', 'boss-view-side'], size);
 
-  // Render 4x4 Iso Canvas
   const bossCanvas = document.getElementById('boss-canvas');
   const bRenderer = new IsoCubeRenderer(bossCanvas, size);
   bRenderer.renderStructure(state.userGrid);
 
-  // 4x4 Controls Builder
   initBossBuilderControls(bRenderer);
 
-  // Start Boss StopWatch
   state.boss.startTime = Date.now();
   startBossTimer();
 }
@@ -659,7 +676,7 @@ function initBossBuilderControls(bRenderer) {
 
       btn.onclick = () => {
         sound.click();
-        state.userGrid[r][c] = (state.userGrid[r][c] + 1) % 5; // 0->1->2->3->4->0
+        state.userGrid[r][c] = (state.userGrid[r][c] + 1) % 5;
         btn.textContent = `${state.userGrid[r][c]}층`;
         bRenderer.renderStructure(state.userGrid);
       };
@@ -707,7 +724,7 @@ function submitBossRaid() {
     const elapsedSec = (elapsedMs / 1000).toFixed(1);
 
     sound.fanfare();
-    const rewardGold = 300;
+    const rewardGold = 200;
     state.gold += rewardGold;
     updateStatsUI();
 
