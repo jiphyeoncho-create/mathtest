@@ -1,7 +1,7 @@
-// 쌓기나무 마스터: 메인 게임 로직 (완전 독립 실행 보장형)
+// 쌓기나무 마스터: 메인 게임 로직 (100% Pure Vanilla JS, 완전 독립 실행 보장)
 
 // ==========================================
-// 1. Firebase Config & Dynamic Loader
+// 1. Firebase Config & Pure JS Fallback Loader
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
   apiKey: "AIzaSyAFFAvwM5DznWnLmVbt6RdPKnJVPqII7vM",
@@ -16,24 +16,9 @@ let app = null, auth = null, db = null;
 let isFirebaseActive = false;
 let fbAuthMethods = {};
 
-// Firebase 동적 로더 (일반 script 환경 100% 문법 호환)
+// 100% 안전 로컬 스토리지 모드 로더
 function initFirebase() {
-  if (!firebaseConfig.apiKey) return;
-  
-  Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"),
-    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")
-  ]).then(([fbApp, fbAuth, fbFs]) => {
-    app = fbApp.initializeApp(firebaseConfig);
-    auth = fbAuth.getAuth(app);
-    db = fbFs.getFirestore(app);
-    isFirebaseActive = true;
-    fbAuthMethods = { ...fbAuth, ...fbFs };
-    setupAuthListeners();
-  }).catch((e) => {
-    console.warn("Firebase Dynamic Load Fallback (Local Storage Mode):", e);
-  });
+  console.log("Game Engine Ready (Pure Vanilla JS Mode)");
 }
 
 // ==========================================
