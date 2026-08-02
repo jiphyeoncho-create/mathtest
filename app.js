@@ -213,18 +213,47 @@ class IsoCubeRenderer {
       }
     }
 
-    // [앞] 및 [옆] 방향 축 가이드 텍스트 표시
-    if (size === 3) {
-      const frontPos = this.toScreen(2, 2, 0);
-      this.ctx.fillStyle = '#38bdf8';
-      this.ctx.font = 'bold 13px Jua, sans-serif';
-      this.ctx.textAlign = 'center';
-      this.ctx.fillText('▼ [앞] 보는 방향', frontPos.x, frontPos.y + 24);
+    // 사진 속 교과서 표준 방향 라벨 렌더링
+    // 1. [앞] 라벨 (왼쪽 아래 방향)
+    const frontPos = this.toScreen(0, size - 1, 0);
+    const ctx = this.ctx;
+    
+    ctx.save();
+    // [앞] 분홍색 배지
+    ctx.fillStyle = '#fce7f3';
+    ctx.strokeStyle = '#f43f5e';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(frontPos.x - 30, frontPos.y + 14, 46, 22, 6);
+    ctx.fill();
+    ctx.stroke();
 
-      const sidePos = this.toScreen(0, 2, 0);
-      this.ctx.fillStyle = '#c084fc';
-      this.ctx.fillText('[옆] ▶', sidePos.x + 36, sidePos.y + 10);
+    ctx.fillStyle = '#be123c';
+    ctx.font = 'bold 13px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('앞 ➔', frontPos.x - 7, frontPos.y + 30);
+
+    // 2. [옆] 라벨 (오른쪽 아래 방향)
+    const sidePos = this.toScreen(size - 1, size - 1, 0);
+    ctx.fillStyle = '#fef3c7';
+    ctx.strokeStyle = '#d97706';
+    ctx.beginPath();
+    ctx.roundRect(sidePos.x + 8, sidePos.y + 10, 46, 22, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#92400e';
+    ctx.fillText('옆 ➔', sidePos.x + 31, sidePos.y + 26);
+
+    // 3. 층수 라벨 (1층, 2층, 3층...)
+    for (let z = 0; z < size; z++) {
+      const p = this.toScreen(0, 0, z);
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '11px Jua, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${z + 1}층 ➔`, p.x - (this.tileWidth / 2) - 8, p.y - 8);
     }
+    ctx.restore();
   }
 
   renderStructure(grid) {
@@ -259,7 +288,7 @@ class IsoCubeRenderer {
   }
 }
 
-// 2D Projection Views Renderer (위, 앞, 옆 3면도)
+// 2D Projection Views Renderer (사진속 교과서 표준 삼면도)
 class ProjectionRenderer {
   static drawViews(grid, targetCanvasIds = ['view-top', 'view-front', 'view-side'], size = 3) {
     const topCanvas = document.getElementById(targetCanvasIds[0]);
@@ -268,9 +297,10 @@ class ProjectionRenderer {
 
     if (!topCanvas || !frontCanvas || !sideCanvas) return;
 
+    // 1. 위에서 본 모양 (아래: [앞], 오른쪽: [옆])
     this.drawGrid2D(topCanvas, (r, c) => grid[r][c] > 0, size);
     
-    // 앞에서 본 모양 (각 열(y)의 최대 높이)
+    // 2. 앞에서 본 모양 (열 c: 0..size-1 왼쪽➔오른쪽 최고층)
     const frontView = Array(size).fill(0);
     for (let c = 0; c < size; c++) {
       for (let r = 0; r < size; r++) {
@@ -279,11 +309,12 @@ class ProjectionRenderer {
     }
     this.drawElevation2D(frontCanvas, frontView, size);
 
-    // 옆(오른쪽)에서 본 모양 (각 행(x)의 최대 높이)
+    // 3. 옆(오른쪽)에서 본 모양 (앞쪽 r=size-1 ➔ 뒤쪽 r=0 방향)
     const sideView = Array(size).fill(0);
-    for (let r = 0; r < size; r++) {
+    for (let i = 0; i < size; i++) {
+      const r = size - 1 - i; // i=0: 앞쪽 줄, i=size-1: 뒤쪽 줄
       for (let c = 0; c < size; c++) {
-        sideView[r] = Math.max(sideView[r], grid[r][c]);
+        sideView[i] = Math.max(sideView[i], grid[r][c]);
       }
     }
     this.drawElevation2D(sideCanvas, sideView, size);
@@ -329,9 +360,11 @@ class ProjectionRenderer {
   }
 
   static getProjections(grid, size = 3) {
+    // Top View (위)
     const top = Array(size).fill().map(() => Array(size).fill(false));
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) if (grid[r][c] > 0) top[r][c] = true;
 
+    // Front View (앞: 열 c별 높이)
     const front = Array(size).fill().map(() => Array(size).fill(false));
     for (let c=0; c<size; c++) {
       let maxH = 0;
@@ -339,11 +372,13 @@ class ProjectionRenderer {
       for (let h=0; h<maxH; h++) front[size - 1 - h][c] = true;
     }
 
+    // Side View (옆: 앞쪽 r=size-1 ➔ 뒤쪽 r=0 순으로 열 i에 채움)
     const side = Array(size).fill().map(() => Array(size).fill(false));
-    for (let r=0; r<size; r++) {
+    for (let i=0; i<size; i++) {
+      const r = size - 1 - i;
       let maxH = 0;
       for (let c=0; c<size; c++) maxH = Math.max(maxH, grid[r][c]);
-      for (let h=0; h<maxH; h++) side[size - 1 - h][r] = true;
+      for (let h=0; h<maxH; h++) side[size - 1 - h][i] = true;
     }
 
     return { top, front, side };

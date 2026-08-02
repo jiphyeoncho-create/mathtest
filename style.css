@@ -487,10 +487,40 @@ canvas {
   font-weight: normal;
 }
 
-.paper-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 36px);
-  gap: 4px;
+.paper-grid-with-labels {
+  position: relative;
+  padding-bottom: 22px;
+  padding-right: 22px;
+}
+
+.label-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 22px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #f43f5e;
+  font-weight: bold;
+}
+
+.label-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #d97706;
+  font-weight: bold;
+  writing-mode: vertical-rl;
+}
+
+.view-axis-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 4px;
 }
 
 .paper-cell {

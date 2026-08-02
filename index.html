@@ -142,34 +142,56 @@
           <!-- 3D / 2D 캔버스 & 모눈종이 컨테이너 -->
           <div id="canvas-container">
             <div class="canvas-with-guide">
-              <canvas id="main-canvas" width="550" height="360"></canvas>
-              <!-- 위치 일치 안내 툴팁/가이드 -->
-              <div id="mg1-position-guide" class="position-guide-box hidden">
-                <span>💡 <strong>위치 일치 가이드:</strong> [앞]은 모눈종이의 아래쪽, [옆]은 모눈종이의 오른쪽에서 본 모습입니다.</span>
+              <canvas id="main-canvas" width="550" height="370"></canvas>
+              <!-- 사진 표준 방향 안내 바 -->
+              <div id="mg1-position-guide" class="position-guide-box">
+                <span>📍 <strong>교과서 표준 방향:</strong> 3D 입체의 왼쪽 아래가 <strong>[앞]</strong>, 오른쪽 아래가 <strong>[옆]</strong>입니다. 모눈종이는 아래쪽이 <strong>[앞]</strong>입니다!</span>
               </div>
             </div>
             
-            <!-- 미니게임 1: 3x3 모눈종이 입력 그리드 (위치 가이드 포함) -->
+            <!-- 미니게임 1: 모눈종이 3x3 입력 그리드 -->
             <div id="grid-paper-container" class="grid-paper-wrapper hidden">
               <div class="paper-box">
-                <h4>위에서 본 모양 <span class="guide-sub">(3x3 바닥)</span></h4>
-                <div id="paper-top" class="paper-grid"></div>
+                <h4>위에서 본 모양</h4>
+                <div class="paper-grid-with-labels">
+                  <div id="paper-top" class="paper-grid"></div>
+                  <div class="label-bottom">▲ [앞]</div>
+                  <div class="label-right">▶ [옆]</div>
+                </div>
               </div>
               <div class="paper-box">
-                <h4>앞에서 본 모양 <span class="guide-sub">(열별 최고층)</span></h4>
-                <div id="paper-front" class="paper-grid"></div>
+                <h4>앞에서 본 모양</h4>
+                <div class="paper-grid-with-labels">
+                  <div id="paper-front" class="paper-grid"></div>
+                  <div class="label-bottom">← 왼쪽 / 오른쪽 →</div>
+                </div>
               </div>
               <div class="paper-box">
-                <h4>옆에서 본 모양 <span class="guide-sub">(행별 최고층)</span></h4>
-                <div id="paper-side" class="paper-grid"></div>
+                <h4>옆에서 본 모양 (오른쪽)</h4>
+                <div class="paper-grid-with-labels">
+                  <div id="paper-side" class="paper-grid"></div>
+                  <div class="label-bottom">← 앞쪽 / 뒤쪽 →</div>
+                </div>
               </div>
             </div>
 
             <!-- 미니게임 3: 2D 삼면도 제시 뷰 -->
             <div id="view-projections" class="views-grid hidden">
-              <div class="view-box"><h4>위에서 본 모양</h4><canvas id="view-top" width="140" height="140"></canvas></div>
-              <div class="view-box"><h4>앞에서 본 모양</h4><canvas id="view-front" width="140" height="140"></canvas></div>
-              <div class="view-box"><h4>옆에서 본 모양 (오른쪽)</h4><canvas id="view-side" width="140" height="140"></canvas></div>
+              <div class="view-box">
+                <h4>위에서 본 모양</h4>
+                <canvas id="view-top" width="140" height="140"></canvas>
+                <div class="view-axis-label">아래: [앞] | 우측: [옆]</div>
+              </div>
+              <div class="view-box">
+                <h4>앞에서 본 모양</h4>
+                <canvas id="view-front" width="140" height="140"></canvas>
+                <div class="view-axis-label">왼쪽 ➔ 오른쪽</div>
+              </div>
+              <div class="view-box">
+                <h4>옆에서 본 모양 (오른쪽)</h4>
+                <canvas id="view-side" width="140" height="140"></canvas>
+                <div class="view-axis-label">앞쪽 ➔ 뒤쪽</div>
+              </div>
             </div>
           </div>
 
