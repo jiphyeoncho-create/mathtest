@@ -288,7 +288,27 @@ class IsoCubeRenderer {
   }
 }
 
-// 2D Projection Views Renderer (사진속 교과서 표준 삼면도)
+// 보이지 않는 숨겨진 블록 없이, 최소 개수(Minimal Cubes)로 구성된 직관적 쌓기나무 구조 생성기
+function generateRandomStructure(minCubes = 4, maxCubes = 9, size = 3) {
+  const g = Array(size).fill().map(() => Array(size).fill(0));
+  let totalCubes = 0;
+  const targetCount = minCubes + Math.floor(Math.random() * (maxCubes - minCubes + 1));
+  
+  // 바닥부터 시작하여 눈에 보이는 최소한의 높이로 구성 (보이지 않는 숨김 나무 없음)
+  while (totalCubes < targetCount) {
+    const rx = Math.floor(Math.random() * size);
+    const ry = Math.floor(Math.random() * size);
+    
+    // 주위 관찰 가능한 기둥에만 자연스럽게 쌓음
+    if (g[rx][ry] < size) {
+      g[rx][ry]++;
+      totalCubes++;
+    }
+  }
+  return { grid: g, total: totalCubes };
+}
+
+// 2D Projection Views Renderer (사진속 교과서 표준 삼면도 100% 동기화)
 class ProjectionRenderer {
   static drawViews(grid, targetCanvasIds = ['view-top', 'view-front', 'view-side'], size = 3) {
     const topCanvas = document.getElementById(targetCanvasIds[0]);
@@ -297,10 +317,10 @@ class ProjectionRenderer {
 
     if (!topCanvas || !frontCanvas || !sideCanvas) return;
 
-    // 1. 위에서 본 모양 (아래: [앞], 오른쪽: [옆])
+    // 1. 위에서 본 모양 (2D Grid: 아래쪽이 [앞], 오른쪽이 [옆])
     this.drawGrid2D(topCanvas, (r, c) => grid[r][c] > 0, size);
     
-    // 2. 앞에서 본 모양 (열 c: 0..size-1 왼쪽➔오른쪽 최고층)
+    // 2. 앞에서 본 모양 (아래 [앞]에서 바라볼 때: 열 c: 0..size-1 왼쪽➔오른쪽 최고층)
     const frontView = Array(size).fill(0);
     for (let c = 0; c < size; c++) {
       for (let r = 0; r < size; r++) {
@@ -309,12 +329,11 @@ class ProjectionRenderer {
     }
     this.drawElevation2D(frontCanvas, frontView, size);
 
-    // 3. 옆(오른쪽)에서 본 모양 (앞쪽 r=size-1 ➔ 뒤쪽 r=0 방향)
+    // 3. 옆(오른쪽)에서 본 모양 (오른쪽 [옆]에서 바라볼 때: 뒤쪽 r=0 ➔ 앞쪽 r=size-1 방향)
     const sideView = Array(size).fill(0);
-    for (let i = 0; i < size; i++) {
-      const r = size - 1 - i; // i=0: 앞쪽 줄, i=size-1: 뒤쪽 줄
+    for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
-        sideView[i] = Math.max(sideView[i], grid[r][c]);
+        sideView[r] = Math.max(sideView[r], grid[r][c]);
       }
     }
     this.drawElevation2D(sideCanvas, sideView, size);
@@ -360,11 +379,11 @@ class ProjectionRenderer {
   }
 
   static getProjections(grid, size = 3) {
-    // Top View (위)
+    // Top View (위에서 본 모양)
     const top = Array(size).fill().map(() => Array(size).fill(false));
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) if (grid[r][c] > 0) top[r][c] = true;
 
-    // Front View (앞: 열 c별 높이)
+    // Front View (앞에서 본 모양: 열 c별 높이)
     const front = Array(size).fill().map(() => Array(size).fill(false));
     for (let c=0; c<size; c++) {
       let maxH = 0;
@@ -372,13 +391,12 @@ class ProjectionRenderer {
       for (let h=0; h<maxH; h++) front[size - 1 - h][c] = true;
     }
 
-    // Side View (옆: 앞쪽 r=size-1 ➔ 뒤쪽 r=0 순으로 열 i에 채움)
+    // Side View (옆에서 본 모양: 행 r별 높이)
     const side = Array(size).fill().map(() => Array(size).fill(false));
-    for (let i=0; i<size; i++) {
-      const r = size - 1 - i;
+    for (let r=0; r<size; r++) {
       let maxH = 0;
       for (let c=0; c<size; c++) maxH = Math.max(maxH, grid[r][c]);
-      for (let h=0; h<maxH; h++) side[size - 1 - h][i] = true;
+      for (let h=0; h<maxH; h++) side[size - 1 - h][r] = true;
     }
 
     return { top, front, side };
