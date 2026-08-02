@@ -406,10 +406,10 @@ class ProjectionRenderer {
     this.drawElevation2D(frontCanvas, frontView, size);
 
     // 3. 옆(오른쪽)에서 본 모양 (라벨: ← 앞쪽 / 뒤쪽 →)
-    // col 0 = 앞쪽(r = size - 1), col size-1 = 뒤쪽(r = 0)
+    // 사용자 직관 축 반영: col 0 = 앞쪽 (r = 0), col size-1 = 뒤쪽 (r = size-1)
     const sideView = Array(size).fill(0);
     for (let col = 0; col < size; col++) {
-      const r = size - 1 - col;
+      const r = col;
       for (let c = 0; c < size; c++) {
         sideView[col] = Math.max(sideView[col], grid[r][c]);
       }
@@ -469,10 +469,11 @@ class ProjectionRenderer {
       for (let h=0; h<maxH; h++) front[size - 1 - h][c] = true;
     }
 
-    // Side View (옆에서 본 모양: col 0 = 앞쪽 r = size-1, col size-1 = 뒤쪽 r = 0)
+    // Side View (옆에서 본 모양: 앞쪽 = 1열, 뒤쪽 = 3열)
+    // 사용자 직관 공간지각 100% 반영: col 0 = 앞쪽 (r = 0), col size-1 = 뒤쪽 (r = size-1)
     const side = Array(size).fill().map(() => Array(size).fill(false));
     for (let col = 0; col < size; col++) {
-      const r = size - 1 - col;
+      const r = col;
       let maxH = 0;
       for (let c = 0; c < size; c++) maxH = Math.max(maxH, grid[r][c]);
       for (let h = 0; h < maxH; h++) side[size - 1 - h][col] = true;
