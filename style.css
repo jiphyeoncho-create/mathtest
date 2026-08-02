@@ -460,25 +460,29 @@ canvas {
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
 }
 
-/* 모눈종이 3x3 격자 UI (미니게임 1) */
+/* 모눈종이 4x4 격자 UI (미니게임 1: 가로 3열 배치) */
 .grid-paper-wrapper {
   display: flex;
-  gap: 14px;
+  flex-direction: row;
   justify-content: center;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .paper-box {
   background: rgba(30, 41, 59, 0.8);
   border: 1px solid var(--glass-border);
   border-radius: 14px;
-  padding: 10px;
+  padding: 12px;
   text-align: center;
 }
 
 .paper-box h4 {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .guide-sub {
@@ -491,6 +495,16 @@ canvas {
   position: relative;
   padding-bottom: 22px;
   padding-right: 22px;
+}
+
+.paper-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 30px);
+  gap: 4px;
+}
+
+.paper-grid.grid-4x4 {
+  grid-template-columns: repeat(4, 30px);
 }
 
 .label-bottom {
@@ -524,11 +538,11 @@ canvas {
 }
 
 .paper-cell {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid #475569;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -641,6 +655,16 @@ canvas {
   padding: 16px;
   border-radius: 16px;
   border: 1px solid var(--glass-border);
+}
+
+.boss-cont.grid-paper-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .boss-controls-panel h4 {

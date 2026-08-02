@@ -92,11 +92,11 @@ const state = {
   timeLeft: 0,
   startTimeMs: 0,
 
-  // 미니게임 1 모눈종이 3x3 선택 상태
+  // 미니게임 1 모눈종이 4x4 선택 상태
   paperState: {
-    top: Array(3).fill().map(() => Array(3).fill(false)),
-    front: Array(3).fill().map(() => Array(3).fill(false)),
-    side: Array(3).fill().map(() => Array(3).fill(false))
+    top: Array(4).fill().map(() => Array(4).fill(false)),
+    front: Array(4).fill().map(() => Array(4).fill(false)),
+    side: Array(4).fill().map(() => Array(4).fill(false))
   },
 
   // 미니게임 2 연속 스피드 타임어택
@@ -446,25 +446,26 @@ function startMiniGame(gameType) {
   posGuide.classList.add('hidden');
   gameControls.innerHTML = '';
 
-  const { grid, total } = generateRandomStructure(4, 9, 3);
-  state.targetGrid = grid;
-
   if (gameType === 1) {
     // ========================================================
-    // [미니게임 1] 입체모형 보고 (위/앞/옆) 모눈종이에 그리기 (40초, 위치 가이드 포함)
+    // [미니게임 1] 입체모형 보고 (위/앞/옆) 4x4 모눈종이에 그리기 (40초, 가로 3열 배치)
     // ========================================================
-    document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 모눈종이에 모양 그리기';
-    gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 보는 방향 가이드</strong>를 참고해 모눈종이를 클릭해 칠하세요!';
+    document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 4x4 모눈종이에 모양 그리기';
+    gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 방향</strong>을 참고해 4x4 모눈종이를 클릭해 칠해보세요!';
     
+    renderer = new IsoCubeRenderer(canvas, 4);
+    const { grid, total } = generateRandomStructure(5, 12, 4);
+    state.targetGrid = grid;
+
     posGuide.classList.remove('hidden');
     renderer.renderStructure(grid);
     paperWrapper.classList.remove('hidden');
-    initPaperGridUI(grid);
+    initPaperGridUI(grid, 4);
 
     const submitBtn = document.createElement('button');
     submitBtn.className = 'btn btn-gold btn-lg';
-    submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> 모눈종이 제출 & 검수';
-    submitBtn.onclick = () => submitMiniGame1();
+    submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> 4x4 모눈종이 제출 & 검수';
+    submitBtn.onclick = () => submitMiniGame1(4);
     gameControls.appendChild(submitBtn);
 
     startTimer(40);
@@ -474,6 +475,7 @@ function startMiniGame(gameType) {
     // [미니게임 2] 30초 동안 1층/2층/최소개수 연속 스피드 퀴즈 (문제당 5G 적립)
     // ========================================================
     document.getElementById('game-title').textContent = '미니게임 2: 층별 & 최소/최대 개수 30초 스피드 퀴즈!';
+    renderer = new IsoCubeRenderer(canvas, 3);
     scoreBadge.classList.remove('hidden');
     state.mg2Score = 0;
     state.mg2GoldEarned = 0;
@@ -485,14 +487,17 @@ function startMiniGame(gameType) {
 
   } else if (gameType === 3) {
     // ========================================================
-    // [미니게임 3] 2D 삼면도 모양 보고 전체 개수 맞추기 (1분 타임어택, 30s: 20G / 50s: 10G / 60s: 5G)
+    // [미니게임 3] 2D 삼면도 모양 보고 전체 개수 맞추기 (1분 타임어택)
     // ========================================================
     document.getElementById('game-title').textContent = '미니게임 3: 2D 삼면도 보고 총 개수 맞추기 (1분)';
     gamePrompt.innerHTML = '🔍 제시된 <strong>위, 앞, 옆 삼면도</strong>를 보고 전체 쌓기나무 개수를 맞추세요!';
 
+    const { grid, total } = generateRandomStructure(4, 9, 3);
+    state.targetGrid = grid;
+
     canvas.classList.add('hidden');
     viewProjections.classList.remove('hidden');
-    ProjectionRenderer.drawViews(grid);
+    ProjectionRenderer.drawViews(grid, ['view-top', 'view-front', 'view-side'], 3);
 
     const options = new Set([total]);
     while (options.size < 4) {
@@ -506,19 +511,19 @@ function startMiniGame(gameType) {
       gameControls.appendChild(btn);
     });
 
-    startTimer(60); // 1분 (60초)
+    startTimer(60);
   }
 }
 
-// 미니게임 1 모눈종이 3x3 칠하기 UI 초기화
-function initPaperGridUI(grid) {
+// 미니게임 1 모눈종이 4x4 칠하기 UI 초기화
+function initPaperGridUI(grid, size = 4) {
   ['top', 'front', 'side'].forEach(view => {
-    state.paperState[view] = Array(3).fill().map(() => Array(3).fill(false));
+    state.paperState[view] = Array(size).fill().map(() => Array(size).fill(false));
     const container = document.getElementById(`paper-${view}`);
     container.innerHTML = '';
 
-    for (let r = 0; r < 3; r++) {
-      for (let c = 0; c < 3; c++) {
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
         const cell = document.createElement('div');
         cell.className = 'paper-cell';
         cell.onclick = () => {
@@ -675,9 +680,9 @@ function startBossRaid() {
 
   if (!confirm(`🐉 대형 삼면도 보스전에 도전하시겠습니까?\n(37 Gold 이상 보유 조건 충족!)`)) return;
 
-  // Boss전 실행
+  // Boss전 실행 (4x4x4 세팅, 60% 이하인 12~38개 무작위 생성)
   const size = 4;
-  const { grid, total } = generateRandomStructure(27, 64, size);
+  const { grid, total } = generateRandomStructure(12, 38, size);
   state.targetGrid = grid;
   state.boss.targetCubes = total;
   state.boss.size = size;

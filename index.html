@@ -98,8 +98,8 @@
           <div class="boss-banner-body">
             <div class="boss-banner-icon"><i class="fa-solid fa-cubes"></i></div>
             <div class="boss-banner-text">
-              <h3>대형 삼면도 보스전 레이드 (27~64개 쌓기나무)</h3>
-              <p>모은 골드가 <strong>37 Gold 이상</strong>이면 참여 가능! 랜덤 제시되는 <strong>대형 삼면도(위/앞/옆)</strong>를 보고, 3D 공간에 27~64개의 쌓기나무를 직접 쌓아 완성하세요!</p>
+              <h3>대형 삼면도 보스전 레이드 (4x4x4 무작위 60% 이하)</h3>
+              <p>모은 골드가 <strong>37 Gold 이상</strong>이면 참여 가능! 4x4x4 공간에서 <strong>60% 이하(최대 38개)</strong>로 무작위 생성되는 다양한 대형 삼면도를 보고 3D로 완성하세요!</p>
             </div>
             <button id="btn-start-boss" class="btn btn-danger btn-lg">🐉 삼면도 보스전 출전! (37G)</button>
           </div>
@@ -149,27 +149,27 @@
               </div>
             </div>
             
-            <!-- 미니게임 1: 모눈종이 3x3 입력 그리드 -->
+            <!-- 미니게임 1: 모눈종이 4x4 입력 그리드 (가로 3열 배치) -->
             <div id="grid-paper-container" class="grid-paper-wrapper hidden">
               <div class="paper-box">
-                <h4>위에서 본 모양</h4>
+                <h4>위에서 본 모양 <span class="guide-sub">(4x4 모눈)</span></h4>
                 <div class="paper-grid-with-labels">
-                  <div id="paper-top" class="paper-grid"></div>
+                  <div id="paper-top" class="paper-grid grid-4x4"></div>
                   <div class="label-bottom">▲ [앞]</div>
                   <div class="label-right">▶ [옆]</div>
                 </div>
               </div>
               <div class="paper-box">
-                <h4>앞에서 본 모양</h4>
+                <h4>앞에서 본 모양 <span class="guide-sub">(4x4 모눈)</span></h4>
                 <div class="paper-grid-with-labels">
-                  <div id="paper-front" class="paper-grid"></div>
+                  <div id="paper-front" class="paper-grid grid-4x4"></div>
                   <div class="label-bottom">← 왼쪽 / 오른쪽 →</div>
                 </div>
               </div>
               <div class="paper-box">
-                <h4>옆에서 본 모양 (오른쪽)</h4>
+                <h4>옆에서 본 모양 <span class="guide-sub">(4x4 모눈)</span></h4>
                 <div class="paper-grid-with-labels">
-                  <div id="paper-side" class="paper-grid"></div>
+                  <div id="paper-side" class="paper-grid grid-4x4"></div>
                   <div class="label-bottom">← 앞쪽 / 뒤쪽 →</div>
                 </div>
               </div>
