@@ -1,6 +1,33 @@
 // 쌓기나무 마스터: 메인 게임 로직 (100% Pure Vanilla JS, 완전 독립 실행 보장)
 
 // ==========================================
+// 0. 글로벌 바인딩 (최상단 즉시 노출 - 100% 클릭 보장)
+// ==========================================
+window.startMiniGame = function(gameType) {
+  try {
+    if (typeof startMiniGame === 'function') startMiniGame(gameType);
+  } catch (e) {
+    console.error("startMiniGame Error:", e);
+  }
+};
+
+window.startBossRaid = function() {
+  try {
+    if (typeof startBossRaid === 'function') startBossRaid();
+  } catch (e) {
+    console.error("startBossRaid Error:", e);
+  }
+};
+
+window.showScreen = function(screenId) {
+  try {
+    if (typeof showScreen === 'function') showScreen(screenId);
+  } catch (e) {
+    console.error("showScreen Error:", e);
+  }
+};
+
+// ==========================================
 // 1. Firebase Config & Pure JS Fallback Loader
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
@@ -965,146 +992,154 @@ async function renderHallOfFame() {
 // 9. Auth & Global Init (즉시 안전 초기화)
 // ==========================================
 function setupAuthListeners() {
-  const modalAuth = document.getElementById('modal-auth');
-  const btnLoginModal = document.getElementById('btn-login-modal');
-  const btnGoogle = document.getElementById('btn-google-login');
-  const btnAnon = document.getElementById('btn-anon-login');
-  const btnLogout = document.getElementById('btn-logout');
-  const nicknameInput = document.getElementById('player-nickname');
+  try {
+    const modalAuth = document.getElementById('modal-auth');
+    const btnLoginModal = document.getElementById('btn-login-modal');
+    const btnGoogle = document.getElementById('btn-google-login');
+    const btnAnon = document.getElementById('btn-anon-login');
+    const btnLogout = document.getElementById('btn-logout');
+    const nicknameInput = document.getElementById('player-nickname');
 
-  if (nicknameInput) {
-    nicknameInput.value = state.user.name;
-    nicknameInput.oninput = (e) => {
-      state.user.name = e.target.value || '익명 탐험가';
-      localStorage.setItem('cube_user_name', state.user.name);
-    };
-  }
+    if (nicknameInput) {
+      nicknameInput.value = state.user.name;
+      nicknameInput.oninput = (e) => {
+        state.user.name = e.target.value || '익명 탐험가';
+        localStorage.setItem('cube_user_name', state.user.name);
+      };
+    }
 
-  if (btnLoginModal && modalAuth) {
-    btnLoginModal.onclick = () => modalAuth.classList.remove('hidden');
-  }
+    if (btnLoginModal && modalAuth) {
+      btnLoginModal.onclick = () => modalAuth.classList.remove('hidden');
+    }
 
-  if (isFirebaseActive && auth && fbAuthMethods.onAuthStateChanged) {
-    fbAuthMethods.onAuthStateChanged(auth, (user) => {
-      if (user) {
-        state.user.uid = user.uid;
-        state.user.name = user.displayName || (nicknameInput ? nicknameInput.value : '') || '익명 탐험가';
-        const outView = document.getElementById('auth-logged-out-view');
-        const inView = document.getElementById('auth-logged-in-view');
-        if (outView) outView.classList.add('hidden');
-        if (inView) inView.classList.remove('hidden');
-        const dName = document.getElementById('user-display-name');
-        const emailTxt = document.getElementById('user-email-text');
-        const btnTxt = document.getElementById('auth-btn-text');
-        if (dName) dName.textContent = state.user.name;
-        if (emailTxt) emailTxt.textContent = user.isAnonymous ? '익명 회원' : (user.email || 'Google 계정');
-        if (btnTxt) btnTxt.textContent = state.user.name;
-      } else {
-        const outView = document.getElementById('auth-logged-out-view');
-        const inView = document.getElementById('auth-logged-in-view');
-        const btnTxt = document.getElementById('auth-btn-text');
-        if (outView) outView.classList.remove('hidden');
-        if (inView) inView.classList.add('hidden');
-        if (btnTxt) btnTxt.textContent = '로그인';
+    if (isFirebaseActive && auth && fbAuthMethods.onAuthStateChanged) {
+      fbAuthMethods.onAuthStateChanged(auth, (user) => {
+        if (user) {
+          state.user.uid = user.uid;
+          state.user.name = user.displayName || (nicknameInput ? nicknameInput.value : '') || '익명 탐험가';
+          const outView = document.getElementById('auth-logged-out-view');
+          const inView = document.getElementById('auth-logged-in-view');
+          if (outView) outView.classList.add('hidden');
+          if (inView) inView.classList.remove('hidden');
+          const dName = document.getElementById('user-display-name');
+          const emailTxt = document.getElementById('user-email-text');
+          const btnTxt = document.getElementById('auth-btn-text');
+          if (dName) dName.textContent = state.user.name;
+          if (emailTxt) emailTxt.textContent = user.isAnonymous ? '익명 회원' : (user.email || 'Google 계정');
+          if (btnTxt) btnTxt.textContent = state.user.name;
+        } else {
+          const outView = document.getElementById('auth-logged-out-view');
+          const inView = document.getElementById('auth-logged-in-view');
+          const btnTxt = document.getElementById('auth-btn-text');
+          if (outView) outView.classList.remove('hidden');
+          if (inView) inView.classList.add('hidden');
+          if (btnTxt) btnTxt.textContent = '로그인';
+        }
+      });
+
+      if (btnGoogle) {
+        btnGoogle.onclick = async () => {
+          const provider = new fbAuthMethods.GoogleAuthProvider();
+          try {
+            await fbAuthMethods.signInWithPopup(auth, provider);
+            if (modalAuth) modalAuth.classList.add('hidden');
+          } catch (e) {
+            alert("Google 로그인 에러: " + e.message);
+          }
+        };
       }
-    });
 
-    if (btnGoogle) {
-      btnGoogle.onclick = async () => {
-        const provider = new fbAuthMethods.GoogleAuthProvider();
-        try {
-          await fbAuthMethods.signInWithPopup(auth, provider);
+      if (btnAnon) {
+        btnAnon.onclick = async () => {
+          try {
+            await fbAuthMethods.signInAnonymously(auth);
+            if (modalAuth) modalAuth.classList.add('hidden');
+          } catch (e) {
+            alert("익명 로그인 에러: " + e.message);
+          }
+        };
+      }
+
+      if (btnLogout) {
+        btnLogout.onclick = () => {
+          fbAuthMethods.signOut(auth);
           if (modalAuth) modalAuth.classList.add('hidden');
-        } catch (e) {
-          alert("Google 로그인 에러: " + e.message);
-        }
-      };
-    }
-
-    if (btnAnon) {
-      btnAnon.onclick = async () => {
-        try {
-          await fbAuthMethods.signInAnonymously(auth);
+        };
+      }
+    } else {
+      if (btnAnon) {
+        btnAnon.onclick = () => {
           if (modalAuth) modalAuth.classList.add('hidden');
-        } catch (e) {
-          alert("익명 로그인 에러: " + e.message);
-        }
-      };
+          const btnTxt = document.getElementById('auth-btn-text');
+          if (btnTxt) btnTxt.textContent = state.user.name;
+        };
+      }
+      if (btnGoogle) {
+        btnGoogle.onclick = () => {
+          alert("Firebase Config를 설정하면 Google 로그인을 사용할 수 있습니다!\n(현재는 로컬 프로필 모드로 작동합니다)");
+        };
+      }
     }
-
-    if (btnLogout) {
-      btnLogout.onclick = () => {
-        fbAuthMethods.signOut(auth);
-        if (modalAuth) modalAuth.classList.add('hidden');
-      };
-    }
-  } else {
-    if (btnAnon) {
-      btnAnon.onclick = () => {
-        if (modalAuth) modalAuth.classList.add('hidden');
-        const btnTxt = document.getElementById('auth-btn-text');
-        if (btnTxt) btnTxt.textContent = state.user.name;
-      };
-    }
-    if (btnGoogle) {
-      btnGoogle.onclick = () => {
-        alert("Firebase Config를 설정하면 Google 로그인을 사용할 수 있습니다!\n(현재는 로컬 프로필 모드로 작동합니다)");
-      };
-    }
+  } catch (e) {
+    console.warn("setupAuthListeners safe caught:", e);
   }
 }
 
 function initApp() {
-  updateStatsUI();
+  try {
+    updateStatsUI();
 
-  // 미니게임 카드 및 도전하기 버튼 클릭 바인딩
-  document.querySelectorAll('.minigame-card').forEach(card => {
-    card.onclick = (e) => {
-      const gType = parseInt(card.dataset.game, 10);
-      if (gType) startMiniGame(gType);
-    };
-  });
+    // 미니게임 카드 및 도전하기 버튼 클릭 바인딩
+    document.querySelectorAll('.minigame-card').forEach(card => {
+      card.onclick = (e) => {
+        const gType = parseInt(card.dataset.game, 10);
+        if (gType) startMiniGame(gType);
+      };
+    });
 
-  const bossBtn = document.getElementById('btn-start-boss');
-  if (bossBtn) bossBtn.onclick = startBossRaid;
+    const bossBtn = document.getElementById('btn-start-boss');
+    if (bossBtn) bossBtn.onclick = startBossRaid;
 
-  document.querySelectorAll('.btn-back-dashboard').forEach(btn => {
-    btn.onclick = () => {
-      try { sound.click(); } catch(e){}
-      clearInterval(state.gameTimer);
-      clearInterval(state.boss.timerInterval);
-      showScreen('screen-dashboard');
-    };
-  });
+    document.querySelectorAll('.btn-back-dashboard').forEach(btn => {
+      btn.onclick = () => {
+        try { sound.click(); } catch(e){}
+        clearInterval(state.gameTimer);
+        clearInterval(state.boss.timerInterval);
+        showScreen('screen-dashboard');
+      };
+    });
 
-  const hofBtn = document.getElementById('btn-open-hof');
-  if (hofBtn) {
-    hofBtn.onclick = () => {
-      try { sound.click(); } catch(e){}
-      renderHallOfFame();
-      const modalHof = document.getElementById('modal-hof');
-      if (modalHof) modalHof.classList.remove('hidden');
-    };
+    const hofBtn = document.getElementById('btn-open-hof');
+    if (hofBtn) {
+      hofBtn.onclick = () => {
+        try { sound.click(); } catch(e){}
+        renderHallOfFame();
+        const modalHof = document.getElementById('modal-hof');
+        if (modalHof) modalHof.classList.remove('hidden');
+      };
+    }
+
+    const guideBtn = document.getElementById('btn-how-to-play');
+    if (guideBtn) {
+      guideBtn.onclick = () => {
+        try { sound.click(); } catch(e){}
+        const modalGuide = document.getElementById('modal-guide');
+        if (modalGuide) modalGuide.classList.remove('hidden');
+      };
+    }
+
+    document.querySelectorAll('.btn-close-modal').forEach(btn => {
+      btn.onclick = (e) => {
+        const modal = e.target.closest('.modal-overlay');
+        if (modal) modal.classList.add('hidden');
+      };
+    });
+
+    setupAuthListeners();
+    initFirebase();
+  } catch (e) {
+    console.error("initApp safe caught:", e);
   }
-
-  const guideBtn = document.getElementById('btn-how-to-play');
-  if (guideBtn) {
-    guideBtn.onclick = () => {
-      try { sound.click(); } catch(e){}
-      const modalGuide = document.getElementById('modal-guide');
-      if (modalGuide) modalGuide.classList.remove('hidden');
-    };
-  }
-
-  document.querySelectorAll('.btn-close-modal').forEach(btn => {
-    btn.onclick = (e) => {
-      const modal = e.target.closest('.modal-overlay');
-      if (modal) modal.classList.add('hidden');
-    };
-  });
-
-  setupAuthListeners();
-  initFirebase(); // 비동기 파이어베이스 초기화 (게임 실행 영향 0%)
 }
 
 // 글로벌 window 객체 바인딩 (HTML direct onclick 100% 지원)
