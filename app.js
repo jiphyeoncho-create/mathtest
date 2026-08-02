@@ -211,7 +211,7 @@ class IsoCubeRenderer {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 바닥 점선 격자 렌더링 (쌓기나무가 놓인 자리는 연보라색/하늘색 바닥 하이라이트 힌트 표시)
+    // 1. 바닥 점선 모눈 격자 전체 렌더링 (사진속 바닥 점선 모눈)
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const { x: sx, y: sy } = this.toScreen(x, y, 0);
@@ -224,19 +224,17 @@ class IsoCubeRenderer {
         ctx.lineTo(sx - w, sy - h);
         ctx.closePath();
         
-        // 쌓기나무가 있는 바닥 위치는 또렷한 보라색/하늘색 힌트로 채움! (사진속 바닥 투영 효과)
-        if (grid && grid[x] && grid[x][y] > 0) {
-          ctx.fillStyle = 'rgba(99, 102, 241, 0.45)';
-        } else {
-          ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
-        }
+        // 쌓기나무가 위치한 바닥면은 하늘색/보라색 반투명 채우기 & 바닥 점선 모눈 윤곽선
+        const isFilled = grid && grid[x] && grid[x][y] > 0;
+        ctx.fillStyle = isFilled ? 'rgba(56, 189, 248, 0.25)' : 'rgba(30, 41, 59, 0.4)';
         ctx.fill();
 
-        ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = grid && grid[x] && grid[x][y] > 0 ? '#a5b4fc' : '#94a3b8';
-        ctx.lineWidth = grid && grid[x] && grid[x][y] > 0 ? 1.5 : 1;
+        // 첨부 이미지와 100% 똑같은 바닥 점선 모눈 (Dotted Line Grid)
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = isFilled ? '#38bdf8' : 'rgba(148, 163, 184, 0.6)';
+        ctx.lineWidth = isFilled ? 1.8 : 1.2;
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.setLineDash([]); // Reset line dash
       }
     }
 
