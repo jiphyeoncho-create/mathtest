@@ -147,17 +147,21 @@ class IsoCubeRenderer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  toScreen(gx, gy, gz) {
+  // 3D Isometric 좌표 ➔ 화면 스크린 좌표 변환 (첫번째 사진처럼 바닥 점선 격자와 3D 모형 이격 연출)
+  toScreen(gx, gy, gz, isFloor = false) {
     const originX = this.canvas.width / 2;
-    const offsetY = this.gridSize === 4 ? 40 : 30;
+    const offsetY = this.gridSize === 4 ? 45 : 35;
     const originY = this.canvas.height / 2 + offsetY;
     const sx = originX + (gx - gy) * (this.tileWidth / 2);
-    const sy = originY + (gx + gy) * (this.tileHeight / 2) - gz * this.cubeHeight;
+    
+    // 바닥 격자와 3D 쌓기나무 사이를 이격(Floating Offset)시키는 오프셋 (첫번째 가이드 이미지 구현)
+    const floatElevation = isFloor ? 0 : (this.cubeHeight * 1.5);
+    const sy = originY + (gx + gy) * (this.tileHeight / 2) - floatElevation - gz * this.cubeHeight;
     return { x: sx, y: sy };
   }
 
   drawCube(gx, gy, gz, color = '#6366f1') {
-    const { x, y } = this.toScreen(gx, gy, gz);
+    const { x, y } = this.toScreen(gx, gy, gz, false);
     const w = this.tileWidth / 2;
     const h = this.tileHeight / 2;
     const ch = this.cubeHeight;
@@ -198,7 +202,7 @@ class IsoCubeRenderer {
     ctx.fill();
     ctx.stroke();
 
-    // 2층 이상 올라간 큐브 상단 윗면에 [2층], [3층] 수치 배지 표시 (착시 0% 해소)
+    // 2층 이상 올라간 큐브 상단 윗면에 [2층], [3층] 수치 배지 표시
     if (gz >= 1) {
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 11px Jua, sans-serif';
@@ -211,10 +215,10 @@ class IsoCubeRenderer {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 바닥 점선 모눈 격자 전체 렌더링 (사진속 바닥 점선 모눈)
+    // 1. 바닥 점선 모눈 격자 전체 렌더링 (첫번째 사진속 맨 아래 바닥 점선 모눈)
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
-        const { x: sx, y: sy } = this.toScreen(x, y, 0);
+        const { x: sx, y: sy } = this.toScreen(x, y, 0, true);
         const w = this.tileWidth / 2;
         const h = this.tileHeight / 2;
         ctx.beginPath();
@@ -224,17 +228,15 @@ class IsoCubeRenderer {
         ctx.lineTo(sx - w, sy - h);
         ctx.closePath();
         
-        // 쌓기나무가 위치한 바닥면은 하늘색/보라색 반투명 채우기 & 바닥 점선 모눈 윤곽선
-        const isFilled = grid && grid[x] && grid[x][y] > 0;
-        ctx.fillStyle = isFilled ? 'rgba(56, 189, 248, 0.25)' : 'rgba(30, 41, 59, 0.4)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
         ctx.fill();
 
-        // 첨부 이미지와 100% 똑같은 바닥 점선 모눈 (Dotted Line Grid)
+        // 첫번째 사진속 또렷한 바닥 점선 모눈 (Dotted Grid)
         ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = isFilled ? '#38bdf8' : 'rgba(148, 163, 184, 0.6)';
-        ctx.lineWidth = isFilled ? 1.8 : 1.2;
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash
+        ctx.setLineDash([]);
       }
     }
 
@@ -321,19 +323,19 @@ class IsoCubeRenderer {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 각 기둥 위치마다 바닥 점선 격자로 수직 하강하는 하늘색 투영 점선 렌더링 (사진속 가이드 점선)
+    // 1. 공중에 떠 있는 3D 모형 밑면에서부터 맨 아래 바닥 점선 격자까지 수직 하강하는 하늘색 투영 점선 렌더링 (첫번째 사진 100% 구현)
     ctx.save();
-    ctx.setLineDash([3, 3]);
+    ctx.setLineDash([4, 4]);
     ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1.8;
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const height = grid[x][y];
         if (height > 0) {
-          const topPoint = this.toScreen(x, y, height);
-          const floorPoint = this.toScreen(x, y, 0);
+          const cubeBottomPoint = this.toScreen(x, y, 0, false);
+          const floorPoint = this.toScreen(x, y, 0, true);
           ctx.beginPath();
-          ctx.moveTo(topPoint.x, topPoint.y);
+          ctx.moveTo(cubeBottomPoint.x, cubeBottomPoint.y);
           ctx.lineTo(floorPoint.x, floorPoint.y);
           ctx.stroke();
         }
