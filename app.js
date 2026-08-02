@@ -221,13 +221,12 @@ class IsoCubeRenderer {
 
     ctx.save();
 
-    // 2. [위] 초록색 배지 (상단 중앙 `↓ 위`)
+    // [위] 초록색 배지 (상단 중앙 `↓ 위`)
     const topPos = { x: this.canvas.width / 2, y: 22 };
     ctx.fillStyle = '#dcfce7';
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(topPos.x - 22, topPos.y - 10, 44, 22, 6);
+    this.drawRoundRect(ctx, topPos.x - 22, topPos.y - 10, 44, 22, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -241,13 +240,12 @@ class IsoCubeRenderer {
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText('↓', topPos.x, topPos.y + 22);
 
-    // 3. [앞] 분홍색 배지 (왼쪽 아래 `↗ 앞`)
+    // [앞] 분홍색 배지 (왼쪽 아래 `↗ 앞`)
     const frontPos = this.toScreen(0, size - 1, 0);
     ctx.fillStyle = '#fce7f3';
     ctx.strokeStyle = '#f43f5e';
     ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(frontPos.x - 48, frontPos.y + 14, 46, 22, 6);
+    this.drawRoundRect(ctx, frontPos.x - 48, frontPos.y + 14, 46, 22, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -261,13 +259,12 @@ class IsoCubeRenderer {
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText('↗', frontPos.x + 4, frontPos.y + 26);
 
-    // 4. [옆] 파란색 배지 (오른쪽 아래 `↖ 옆`)
+    // [옆] 파란색 배지 (오른쪽 아래 `↖ 옆`)
     const sidePos = this.toScreen(size - 1, size - 1, 0);
     ctx.fillStyle = '#dbeafe';
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(sidePos.x + 8, sidePos.y + 14, 46, 22, 6);
+    this.drawRoundRect(ctx, sidePos.x + 8, sidePos.y + 14, 46, 22, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -282,6 +279,21 @@ class IsoCubeRenderer {
     ctx.fillText('↖', sidePos.x - 2, sidePos.y + 26);
 
     ctx.restore();
+  }
+
+  // 100% 호환 안전 둥근 사각형 렌더러
+  drawRoundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
   }
 
   renderStructure(grid) {
