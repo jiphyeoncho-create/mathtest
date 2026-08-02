@@ -207,11 +207,11 @@ class IsoCubeRenderer {
     }
   }
 
-  drawGridFloorWithAxis() {
+  drawGridFloorWithAxis(grid = null) {
     const size = this.gridSize;
     const ctx = this.ctx;
 
-    // 1. 바닥 점선 격자 렌더링
+    // 1. 바닥 점선 격자 렌더링 (쌓기나무가 놓인 자리는 연보라색/하늘색 바닥 하이라이트 힌트 표시)
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const { x: sx, y: sy } = this.toScreen(x, y, 0);
@@ -223,13 +223,20 @@ class IsoCubeRenderer {
         ctx.lineTo(sx, sy - 2 * h);
         ctx.lineTo(sx - w, sy - h);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
+        
+        // 쌓기나무가 있는 바닥 위치는 또렷한 보라색/하늘색 힌트로 채움! (사진속 바닥 투영 효과)
+        if (grid && grid[x] && grid[x][y] > 0) {
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.45)';
+        } else {
+          ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
+        }
         ctx.fill();
+
         ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = grid && grid[x] && grid[x][y] > 0 ? '#a5b4fc' : '#94a3b8';
+        ctx.lineWidth = grid && grid[x] && grid[x][y] > 0 ? 1.5 : 1;
         ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash
+        ctx.setLineDash([]);
       }
     }
 
@@ -312,7 +319,7 @@ class IsoCubeRenderer {
 
   renderStructure(grid) {
     this.clear();
-    this.drawGridFloorWithAxis();
+    this.drawGridFloorWithAxis(grid);
     const size = this.gridSize;
     const ctx = this.ctx;
 
@@ -626,11 +633,12 @@ function startMiniGame(gameType) {
   }
 }
 
-// 미니게임 1 모눈종이 3x3 칠하기 UI 초기화
+// 미니게임 1 모눈종이 3x3 칠하기 UI 초기화 ([앞]과 [옆] 2개 모눈종이)
 function initPaperGridUI(grid, size = 3) {
-  ['top', 'front', 'side'].forEach(view => {
+  ['front', 'side'].forEach(view => {
     state.paperState[view] = Array(size).fill().map(() => Array(size).fill(false));
     const container = document.getElementById(`paper-${view}`);
+    if (!container) return;
     container.innerHTML = '';
 
     for (let r = 0; r < size; r++) {
@@ -638,7 +646,7 @@ function initPaperGridUI(grid, size = 3) {
         const cell = document.createElement('div');
         cell.className = 'paper-cell';
         cell.onclick = () => {
-          sound.click();
+          try { sound.click(); } catch(e){}
           state.paperState[view][r][c] = !state.paperState[view][r][c];
           cell.classList.toggle('active', state.paperState[view][r][c]);
         };
@@ -652,7 +660,8 @@ function submitMiniGame1(size = 3) {
   const actualProj = ProjectionRenderer.getProjections(state.targetGrid, size);
   let isCorrect = true;
 
-  ['top', 'front', 'side'].forEach(view => {
+  // [앞]과 [옆] 2개 모눈종이 검수 (위에서 본 모양은 3D 바닥 힌트로 기본 제시)
+  ['front', 'side'].forEach(view => {
     for (let r=0; r<size; r++) {
       for (let c=0; c<size; c++) {
         if (state.paperState[view][r][c] !== actualProj[view][r][c]) {
