@@ -92,11 +92,11 @@ const state = {
   timeLeft: 0,
   startTimeMs: 0,
 
-  // 미니게임 1 모눈종이 4x4 선택 상태
+  // 미니게임 1 모눈종이 3x3 선택 상태
   paperState: {
-    top: Array(4).fill().map(() => Array(4).fill(false)),
-    front: Array(4).fill().map(() => Array(4).fill(false)),
-    side: Array(4).fill().map(() => Array(4).fill(false))
+    top: Array(3).fill().map(() => Array(3).fill(false)),
+    front: Array(3).fill().map(() => Array(3).fill(false)),
+    side: Array(3).fill().map(() => Array(3).fill(false))
   },
 
   // 미니게임 2 연속 스피드 타임어택
@@ -448,24 +448,24 @@ function startMiniGame(gameType) {
 
   if (gameType === 1) {
     // ========================================================
-    // [미니게임 1] 입체모형 보고 (위/앞/옆) 4x4 모눈종이에 그리기 (40초, 가로 3열 배치)
+    // [미니게임 1] 입체모형 보고 (위/앞/옆) 3x3 모눈종이에 그리기 (40초, 가로 3열 배치)
     // ========================================================
-    document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 4x4 모눈종이에 모양 그리기';
-    gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 방향</strong>을 참고해 4x4 모눈종이를 클릭해 칠해보세요!';
+    document.getElementById('game-title').textContent = '미니게임 1: (위/앞/옆) 3x3 모눈종이에 모양 그리기';
+    gamePrompt.innerHTML = '🎨 3D 입체도형의 <strong>[앞]과 [옆] 방향</strong>을 참고해 3x3 모눈종이를 클릭해 칠해보세요!';
     
-    renderer = new IsoCubeRenderer(canvas, 4);
-    const { grid, total } = generateRandomStructure(5, 12, 4);
+    renderer = new IsoCubeRenderer(canvas, 3);
+    const { grid, total } = generateRandomStructure(4, 9, 3);
     state.targetGrid = grid;
 
     posGuide.classList.remove('hidden');
     renderer.renderStructure(grid);
     paperWrapper.classList.remove('hidden');
-    initPaperGridUI(grid, 4);
+    initPaperGridUI(grid, 3);
 
     const submitBtn = document.createElement('button');
     submitBtn.className = 'btn btn-gold btn-lg';
-    submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> 4x4 모눈종이 제출 & 검수';
-    submitBtn.onclick = () => submitMiniGame1(4);
+    submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> 3x3 모눈종이 제출 & 검수';
+    submitBtn.onclick = () => submitMiniGame1(3);
     gameControls.appendChild(submitBtn);
 
     startTimer(40);
@@ -515,8 +515,8 @@ function startMiniGame(gameType) {
   }
 }
 
-// 미니게임 1 모눈종이 4x4 칠하기 UI 초기화
-function initPaperGridUI(grid, size = 4) {
+// 미니게임 1 모눈종이 3x3 칠하기 UI 초기화
+function initPaperGridUI(grid, size = 3) {
   ['top', 'front', 'side'].forEach(view => {
     state.paperState[view] = Array(size).fill().map(() => Array(size).fill(false));
     const container = document.getElementById(`paper-${view}`);
@@ -537,13 +537,13 @@ function initPaperGridUI(grid, size = 4) {
   });
 }
 
-function submitMiniGame1() {
-  const actualProj = ProjectionRenderer.getProjections(state.targetGrid, 3);
+function submitMiniGame1(size = 3) {
+  const actualProj = ProjectionRenderer.getProjections(state.targetGrid, size);
   let isCorrect = true;
 
   ['top', 'front', 'side'].forEach(view => {
-    for (let r=0; r<3; r++) {
-      for (let c=0; c<3; c++) {
+    for (let r=0; r<size; r++) {
+      for (let c=0; c<size; c++) {
         if (state.paperState[view][r][c] !== actualProj[view][r][c]) {
           isCorrect = false;
         }
