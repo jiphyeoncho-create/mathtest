@@ -16,24 +16,24 @@ let app = null, auth = null, db = null;
 let isFirebaseActive = false;
 let fbAuthMethods = {};
 
-// Firebase 동적 로더 (실패하더라도 게임 실행에 영향 0%)
-async function initFirebase() {
-  try {
-    const fbApp = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-    const fbAuth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-    const fbFs = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-    
-    if (firebaseConfig.apiKey) {
-      app = fbApp.initializeApp(firebaseConfig);
-      auth = fbAuth.getAuth(app);
-      db = fbFs.getFirestore(app);
-      isFirebaseActive = true;
-      fbAuthMethods = { ...fbAuth, ...fbFs };
-      setupAuthListeners();
-    }
-  } catch (e) {
+// Firebase 동적 로더 (일반 script 환경 100% 문법 호환)
+function initFirebase() {
+  if (!firebaseConfig.apiKey) return;
+  
+  Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js")
+  ]).then(([fbApp, fbAuth, fbFs]) => {
+    app = fbApp.initializeApp(firebaseConfig);
+    auth = fbAuth.getAuth(app);
+    db = fbFs.getFirestore(app);
+    isFirebaseActive = true;
+    fbAuthMethods = { ...fbAuth, ...fbFs };
+    setupAuthListeners();
+  }).catch((e) => {
     console.warn("Firebase Dynamic Load Fallback (Local Storage Mode):", e);
-  }
+  });
 }
 
 // ==========================================
