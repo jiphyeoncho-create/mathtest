@@ -1,12 +1,3 @@
 {
-  "version": 2,
-  "name": "stacking-cubes-math6",
-  "buildCommand": "node build.js",
-  "cleanUrls": true,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "cleanUrls": true
 }

@@ -5,15 +5,15 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, onAuth
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. Firebase Config (Vercel 환경변수 / env.js 동적 주입)
+// 1. Firebase Config (안전한 클라이언트 설정 연동)
 // ==========================================
 const firebaseConfig = window.__FIREBASE_CONFIG__ || {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyAFFAvwM5DznWnLmVbt6RdPKnJVPqII7vM",
+  authDomain: "game-5364a.firebaseapp.com",
+  projectId: "game-5364a",
+  storageBucket: "game-5364a.firebasestorage.app",
+  messagingSenderId: "241580484950",
+  appId: "1:241580484950:web:996455c6366b095b9f4ef7"
 };
 
 let app, auth, db;
