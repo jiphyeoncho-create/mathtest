@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 리더보드 (명예의 전당) 규칙
+    match /leaderboard/{docId} {
+      // 누구나 명예의 전당 순위 읽기 가능
+      allow read: if true;
+      
+      // 인증된 사용자(익명 및 Google 로그인)만 본인 소유의 기록 등록 가능
+      allow create: if request.auth != null 
+                    && request.resource.data.timeSec is number
+                    && request.resource.data.gold is number;
+                    
+      // 타인의 명예의 전당 기록 수정 및 삭제 금지
+      allow update, delete: if false;
+    }
+    
+    // 개별 사용자 프로필 및 데이터 분리 규칙
+    match /users/{userId} {
+      // 오직 본인 UID 소유자만 자신의 데이터를 읽고 쓸 수 있음
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
